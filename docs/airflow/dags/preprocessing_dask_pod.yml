@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations: {}
+  labels:
+    airflow_version: 2.0.1
+    kubernetes_pod_operator: 'True'
+    dag_id: FlowiTrainDask
+    task_id: preprocessing-dask-master
+    execution_date: 2021-04-01T0000000000-91d76bfed
+    try_number: '2'
+  name: preprocessing-dask.7d21843065c84bb8bedf3edc95533b5f
+  namespace: dask
+spec:
+  affinity: {}
+  containers:
+  - args: []
+    command: []
+    env:
+    - name: RUN_ID
+      value: test123
+    envFrom: []
+    image: localhost:32000/flowi-preprocessing:latest
+    imagePullPolicy: Always
+    name: base
+    ports: []
+    resources: {}
+    volumeMounts:
+    - mountPath: "/data"
+      name: data-volume
+  hostNetwork: false
+  imagePullSecrets: []
+  initContainers: []
+  restartPolicy: Never
+  securityContext: {}
+  serviceAccountName: default
+  tolerations: []
+  volumes:
+  - hostPath: "/tmp/flowi"
+    name: data-volume

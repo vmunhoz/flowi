@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: flowi-ui-deployment
+  labels:
+    app: flowi-ui
+spec:
+  serviceName: flowi-ui-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flowi-ui
+  template:
+    metadata:
+      labels:
+        app: flowi-ui
+    spec:
+      containers:
+      - name: flowi-ui
+        image: localhost:32000/flowi-ui
+        ports:
+        - containerPort: 8080
+        env:
+        - name: REACT_APP_API_V1_ENDPOINT
+          value: http://flowi-ui-service
+        volumeMounts:
+        - name: local-vol
+          mountPath: /home/leo/flowi-front
+      volumes:
+        - name: "local-vol"
+          persistentVolumeClaim:
+            claimName: redis-pvc
+  volumeClaimTemplates:
+  - metadata:
+      name: local-vol
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "local-storage"

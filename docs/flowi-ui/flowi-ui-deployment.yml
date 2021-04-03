@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flowi-ui-deployment
+  namespace: flowi
+  labels:
+    app: flowi-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flowi-ui
+  template:
+    metadata:
+      labels:
+        app: flowi-ui
+    spec:
+      containers:
+      - name: flowi-ui
+        image: localhost:32000/flowi-ui
+        ports:
+        - containerPort: 8080
+        env:
+        - name: REACT_APP_API_V1_ENDPOINT
+          value: http://flowi-ui-service
+          
