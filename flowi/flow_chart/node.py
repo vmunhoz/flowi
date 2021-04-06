@@ -9,13 +9,14 @@ from flowi.utilities.strings import convert_camel_to_snake
 
 class Node(object):
 
-    def __init__(self, id_: str, node: dict, previous_node: str or None):
+    def __init__(self, id_: str, node: dict, previous_node: str or None, next_node: str or None):
         self.id: str = id_
         node_type = node['type']
         self.method_name: str = convert_camel_to_snake(node['properties']['name'])
         self.type: str = node_type
         self.node_class = node['properties']['class']
         self.previous_nodes: List[Node] = [previous_node] if previous_node is not None else []
+        self.next_nodes: List[Node] = [next_node] if next_node is not None else []
         self.changed_variables: list = []
         self.result: dict = dict()
         self.finished: bool = False
@@ -27,6 +28,10 @@ class Node(object):
     def add_previous_node(self, previous_node: Node or None):
         if previous_node is not None:
             self.previous_nodes.append(previous_node)
+
+    def add_next_node(self, next_node: Node or None):
+        if next_node is not None:
+            self.next_nodes.append(next_node)
 
     def _import_component(self):
         node_type = self.type.lower()

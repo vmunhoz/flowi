@@ -10,7 +10,7 @@ from flowi.utilities.logger import Logger
 class FlowChart(object):
 
     def __init__(self, flow_chart_json: dict):
-        self._audit = Logger(logger_name=__name__)
+        self._logger = Logger(logger_name=__name__)
         self._flow_chart_json = flow_chart_json
         self._runs_params = []
         self._parameter_tuning_types = ['Preprocessing']
@@ -24,30 +24,36 @@ class FlowChart(object):
         links = self._flow_chart_json['links']
 
         topology = Topology(nodes)
+        for node_id in nodes:
+            self._add_node(node=nodes[node_id])
+
         for link in links:
             node_from = links[link]['from']['nodeId']
             node_to = links[link]['to']['nodeId']
             topology.add_edge(node_from=node_from, node_to=node_to)
 
-            self._add_node(node=nodes[node_from])
+            self._add_node(node=nodes[node_from], next_node_id=node_to)
             self._add_node(node=nodes[node_to], previous_node_id=node_from)
 
-        for node_id in nodes:
-            if node_id not in self._nodes:
-                self._audit.warning(f'Node {node_id} is not linked to any node')
-                self._add_node(node=nodes[node_id])
+        # for node_id in nodes:
+        #     if node_id not in self._nodes:
+        #         self._logger.warning(f'Node {node_id} is not linked to any node')
+        #         self._add_node(node=nodes[node_id])
 
         self._nodes_execution_order = topology.topological_sort()
-        self._audit.debug(f"Nodes running order: {self._nodes_execution_order}")
+        self._logger.debug(f"Nodes running order: {self._nodes_execution_order}")
         self.generate_runs()
 
-    def _add_node(self, node: dict, previous_node_id: str or None = None):
+    def _add_node(self, node: dict, previous_node_id: str or None = None, next_node_id: str or None = None):
         node_id = node['id']
         previous_node = self._nodes.get(previous_node_id, None)
+        next_node = self._nodes.get(next_node_id, None)
+
         if node_id not in self._nodes:
-            self._nodes[node_id] = Node(id_=node_id, node=node, previous_node=previous_node)
+            self._nodes[node_id] = Node(id_=node_id, node=node, previous_node=previous_node, next_node=next_node)
         else:
             self._nodes[node_id].add_previous_node(previous_node=previous_node)
+            self._nodes[node_id].add_next_node(next_node=next_node)
 
     def generate_runs(self):
         combined_grid_params = {}
@@ -71,7 +77,7 @@ class FlowChart(object):
 
             for node_id in self._nodes_execution_order:
                 node: Node = self._nodes[node_id]
-                self._audit.info(f'Processing node {node_id} | {node.type} - {node.method_name}')
+                self._logger.info(f'Processing node {node_id} | {node.type} - {node.method_name}')
                 if node.type in self._parameter_tuning_types:
                     node.attributes = run_params[node_id]
                 result = node.run(shared_variables=shared_variables)

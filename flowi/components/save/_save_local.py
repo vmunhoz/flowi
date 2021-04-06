@@ -7,10 +7,10 @@ class SaveLocal(ComponentBase):
 
     def __init__(self):
         super().__init__()
-        self._audit = Logger(logger_name=__name__)
+        self._logger = Logger(logger_name=__name__)
 
     def save_file(self, input_variable_df: dd.DataFrame, path: str, file_type: str):
-        self._audit.debug('Loading files from directory: {}'.format(path))
+        self._logger.debug('Loading files from directory: {}'.format(path))
 
         return self._save(file_type=file_type)(input_variable_df, path)
 

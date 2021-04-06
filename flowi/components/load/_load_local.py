@@ -8,10 +8,10 @@ class LoadLocal(ComponentBase):
 
     def __init__(self):
         super().__init__()
-        self._audit = Logger(logger_name=__name__)
+        self._logger = Logger(logger_name=__name__)
 
     def load_file(self, file_type: str, train_path: str, test_path: str = '', test_split: float = 0.2):
-        self._audit.debug('Loading train file: {}'.format(train_path))
+        self._logger.debug('Loading train file: {}'.format(train_path))
         train_df = self.load(file_type=file_type)(train_path)
 
         if test_path:
