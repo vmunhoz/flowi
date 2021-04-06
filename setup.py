@@ -13,7 +13,7 @@ with open(os.path.join(HERE, "README.md")) as fid:
 # This call to setup() does all the work
 setup(
     name="flowi",
-    version="0.0.1",
+    version="0.1.1",
     description="ML lifecycle",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -28,7 +28,9 @@ setup(
     packages=["flowi"],
     include_package_data=True,
     install_requires=[
-        "dask[complete]"
+        "dask[complete]",
+        "dask-ml",
+        "sklearn"
     ],
     entry_points={"console_scripts": ["flowi=flowi.__main__:main"]},
 )
