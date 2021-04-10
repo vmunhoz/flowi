@@ -2,9 +2,9 @@
 Preprocessing techniques for ml applications in datasets
 """
 
-from ._classification import Classification
+from ._model_selection import ModelSelection
 
 
 __all__ = [
-    'Classification',
+    'ModelSelection',
 ]

@@ -3,21 +3,13 @@ import os
 
 FLOW_CHART = {
     "nodes": {
-        "2cb8f05f-9baf-4ce2-8a8e-fdaebeecea34": {
-            "id": "2cb8f05f-9baf-4ce2-8a8e-fdaebeecea34",
+        "node-load-1": {
+            "id": "node-load-1",
             "type": "Load",
             "properties": {
                 "name": "LoadFile",
                 "class": "LoadLocal",
-                "output_policy": "create",
-                "output_variables": [
-                    "train_df"
-                ],
-                "input_variables": [
-
-                ],
                 "attributes": {
-                    "output_df": "train_df",
                     "train_path": "test_dataset.csv",
                     "test_path": '',
                     "test_split": 0.2,
@@ -25,19 +17,12 @@ FLOW_CHART = {
                 }
             }
         },
-        "2cb8f05f-9baf-4ce2-8a8e-fdaebeecea35": {
-            "id": "2cb8f05f-9baf-4ce2-8a8e-fdaebeecea35",
+        "node-load-2": {
+            "id": "node-load-2",
             "type": "Load",
             "properties": {
                 "name": "LoadFile",
                 "class": "LoadLocal",
-                "output_policy": "create",
-                "output_variables": [
-                    "train_df"
-                ],
-                "input_variables": [
-
-                ],
                 "attributes": {
                     "output_df": "train_df",
                     "train_path": "test_dataset2.csv",
@@ -47,22 +32,13 @@ FLOW_CHART = {
                 }
             }
         },
-        "13e3b974-f59c-4e0c-b087-12eeb9cd068b": {
-            "id": "13e3b974-f59c-4e0c-b087-12eeb9cd068b",
+        "node-fillna": {
+            "id": "node-fillna",
             "type": "Preprocessing",
             "properties": {
                 "name": "Fillna",
                 "class": "Preprocessing",
-                "description": "Compute a mel-scaled spectrogram.",
-                "output_policy": "none",
-                "output_variables": [
-                    "train_df"
-                ],
-                "input_variables": [
-                    "train_df"
-                ],
                 "attributes": {
-                    "input_variable_df": "train_df",
                     "value": 0,
                     "method": None,
                     "axis": "index",
@@ -70,22 +46,35 @@ FLOW_CHART = {
                 }
             }
         },
-        "14e3b974-f59c-4e0c-b087-12eeb9cd068b": {
-            "id": "14e3b974-f59c-4e0c-b087-12eeb9cd068b",
+        "node-model-svc": {
+            "id": "node-model-svc",
+            "type": "Models",
+            "properties": {
+                "name": "svc",
+                "class": "Classification",
+                "attributes": {
+                    "target_column": "feature_4"
+                }
+            }
+        },
+        "node-metric-accuracy": {
+            "id": "node-metric-accuracy",
+            "type": "Metrics",
+            "properties": {
+                "name": "accuracy",
+                "class": "Classification",
+                "attributes": {
+                    "target_column": "feature_4"
+                }
+            }
+        },
+        "node-save": {
+            "id": "node-save",
             "type": "Save",
             "properties": {
                 "name": "SaveFile",
                 "class": "SaveLocal",
-                "description": "save local.",
-                "output_policy": "none",
-                "output_variables": [
-                    "train_df"
-                ],
-                "input_variables": [
-                    "train_df"
-                ],
                 "attributes": {
-                    "input_variable_df": "train_df",
                     "path": "saved.csv",
                     "file_type": "csv",
                     "merge_policy": "none"
@@ -94,31 +83,52 @@ FLOW_CHART = {
         }
     },
     "links": {
-        "86e6b84d-13ae-44cf-b11e-b374459d6d91": {
-            "id": "86e6b84d-13ae-44cf-b11e-b374459d6d91",
+        "link-load-fillna-1": {
             "from": {
-                "nodeId": "2cb8f05f-9baf-4ce2-8a8e-fdaebeecea34",
+                "nodeId": "node-load-1",
             },
             "to": {
-                "nodeId": "13e3b974-f59c-4e0c-b087-12eeb9cd068b",
+                "nodeId": "node-fillna",
             },
         },
-        "86e6b84d-13ae-44cf-b11e-b374459d6d92": {
-            "id": "86e6b84d-13ae-44cf-b11e-b374459d6d92",
+        "link-load-fillna-2": {
             "from": {
-                "nodeId": "2cb8f05f-9baf-4ce2-8a8e-fdaebeecea35",
+                "nodeId": "node-load-2",
             },
             "to": {
-                "nodeId": "13e3b974-f59c-4e0c-b087-12eeb9cd068b",
+                "nodeId": "node-fillna",
             },
         },
-        "96e6b84d-13ae-44cf-b11e-b374459d6d91": {
-            "id": "86e6b84d-13ae-44cf-b11e-b374459d6d91",
+        # "link-fillna-save": {
+        #     "from": {
+        #         "nodeId": "node-fillna",
+        #     },
+        #     "to": {
+        #         "nodeId": "node-save",
+        #     }
+        # },
+        "link-fillna-svc": {
             "from": {
-                "nodeId": "13e3b974-f59c-4e0c-b087-12eeb9cd068b",
+                "nodeId": "node-fillna",
             },
             "to": {
-                "nodeId": "14e3b974-f59c-4e0c-b087-12eeb9cd068b",
+                "nodeId": "node-model-svc",
+            }
+        },
+        "link-svc-accuracy": {
+            "from": {
+                "nodeId": "node-model-svc",
+            },
+            "to": {
+                "nodeId": "node-metric-accuracy",
+            }
+        },
+        "link-accuracy-save": {
+            "from": {
+                "nodeId": "node-metric-accuracy",
+            },
+            "to": {
+                "nodeId": "node-save",
             }
         }
     }

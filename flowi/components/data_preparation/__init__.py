@@ -2,9 +2,9 @@
 Preprocessing techniques for ml applications in datasets
 """
 
-from ._classification import Classification
+from ._sklearn import DataPreparationSKLearn
 
 
 __all__ = [
-    'Classification',
+    'DataPreparationSKLearn',
 ]
