@@ -33,6 +33,5 @@ class ModelSelection(ComponentBase):
         tune_search.fit(X, y)
         self._logger.debug(f'Model: {model.__class__.__name__}')
         self._logger.debug(f'Best Parameters: {tune_search.best_params_}')
-        print(tune_search.best_params_)
 
         return tune_search.best_estimator_, tune_search.best_params_

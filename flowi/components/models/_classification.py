@@ -1,4 +1,4 @@
-import inspect
+from pickle import dump
 from typing import Any, List
 
 import dask.dataframe as dd
@@ -14,10 +14,14 @@ class Classification(ComponentBase):
         self._logger = Logger(logger_name=__name__)
 
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
+        pickle_name = 'model.pkl'
+        dump(result[0], open(pickle_name, 'wb'))
+
         return {
             'model': result[0],
             'parameters': result[1],
-            'target_column': methods_kwargs['target_column']
+            'target_column': methods_kwargs['target_column'],
+            'pickle': pickle_name
         }
 
     @staticmethod

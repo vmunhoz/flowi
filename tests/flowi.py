@@ -10,7 +10,7 @@ FLOW_CHART = {
                 "name": "LoadFile",
                 "class": "LoadLocal",
                 "attributes": {
-                    "train_path": "test_dataset.csv",
+                    "train_path": "iris.csv",
                     "test_path": '',
                     "test_split": 0.2,
                     "file_type": "csv"
@@ -25,7 +25,7 @@ FLOW_CHART = {
                 "class": "LoadLocal",
                 "attributes": {
                     "output_df": "train_df",
-                    "train_path": "test_dataset2.csv",
+                    "train_path": "iris.csv",
                     "test_path": '',
                     "test_split": 0.2,
                     "file_type": "csv"
@@ -53,7 +53,7 @@ FLOW_CHART = {
                 "name": "svc",
                 "class": "Classification",
                 "attributes": {
-                    "target_column": "feature_4"
+                    "target_column": "class"
                 }
             }
         },
@@ -64,7 +64,7 @@ FLOW_CHART = {
                 "name": "accuracy",
                 "class": "Classification",
                 "attributes": {
-                    "target_column": "feature_4"
+                    "target_column": "class"
                 }
             }
         },

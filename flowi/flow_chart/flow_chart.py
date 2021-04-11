@@ -78,7 +78,6 @@ class FlowChart(object):
             for node_id in self._nodes_execution_order:
                 node: Node = self._nodes[node_id]
                 self._logger.info(f'Processing node {node_id} | {node.type} - {node.method_name}')
-                print(f'Processing node {node_id} | {node.type} - {node.method_name}')
                 if node.type in self._parameter_tuning_types:
                     node.attributes = run_params[node_id]
                 result = node.run(global_variables=global_variables)
