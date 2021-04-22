@@ -3,4 +3,7 @@ venv
 .pytest_cache
 dist
 build
+dask-worker-space/
+mlruns/
 sandbox*
+.coverage

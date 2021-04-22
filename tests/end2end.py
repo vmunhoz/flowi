@@ -1,5 +1,7 @@
-from flowi.flow_chart.flow_chart import FlowChart
 import os
+
+import flowi.settings
+from flowi.flow_chart.flow_chart import FlowChart
 
 FLOW_CHART = {
     "nodes": {
@@ -135,7 +137,10 @@ FLOW_CHART = {
 }
 
 
-def test_end_to_end():
-    flow_chart = FlowChart(flow_chart_json=FLOW_CHART)
+def test_end_to_end(mocker):
+    mocker.patch.object(flowi.settings, 'FLOW_NAME', 'End2End Test Flow')
+    mocker.patch.object(flowi.settings, 'EXPERIMENT_TRACKING', 'MLflow')
+
+    flow_chart = FlowChart(flow_chart=FLOW_CHART)
     flow_chart.run()
     os.remove('saved.csv')

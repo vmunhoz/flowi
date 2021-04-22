@@ -5,6 +5,7 @@ from dask_ml.model_selection import RandomizedSearchCV
 
 from flowi.components.component_base import ComponentBase
 from flowi.components.data_preparation import DataPreparationSKLearn
+from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.utilities.logger import Logger
 
 
@@ -13,9 +14,17 @@ class ModelSelection(ComponentBase):
         self._logger = Logger(logger_name=__name__)
 
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
+        experiment_tracking = ExperimentTracking()
+        model = result[0]
+        parameters = result[1]
+
+        pickle_name = experiment_tracking.save_model(obj=model, file_path=model.__class__.__name__)
+        experiment_tracking.set_param(key=model.__class__.__name__, value=parameters)
         return {
-            'model': result[0],
-            'parameters': result[1]
+            'model': model,
+            'parameters': parameters,
+            'target_column': methods_kwargs['target_column'],
+            'pickle': pickle_name
         }
 
     def random_search(self, df: dd.DataFrame, target_column: str, model, parameters: dict,

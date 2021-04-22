@@ -4,6 +4,7 @@ import dask.dataframe as dd
 import pandas as pd
 
 from flowi.components.component_base import ComponentBase
+from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.utilities.logger import Logger
 
 
@@ -12,6 +13,10 @@ class Preprocessing(ComponentBase):
         self._logger = Logger(logger_name=__name__)
 
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
+        experiment_tracking = ExperimentTracking()
+
+        del methods_kwargs['df']
+        experiment_tracking.set_param(key=method_name, value=methods_kwargs)
         return {
             'df': result
         }

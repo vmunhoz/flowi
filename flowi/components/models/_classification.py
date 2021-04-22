@@ -6,6 +6,7 @@ from sklearn import svm
 
 from flowi.components.component_base import ComponentBase
 from flowi.components.model_selection import ModelSelection
+from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.utilities.logger import Logger
 
 
@@ -14,12 +15,15 @@ class Classification(ComponentBase):
         self._logger = Logger(logger_name=__name__)
 
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
-        pickle_name = 'model.pkl'
-        dump(result[0], open(pickle_name, 'wb'))
+        experiment_tracking = ExperimentTracking()
+        model = result[0]
+        parameters = result[1]
 
+        pickle_name = experiment_tracking.save_model(obj=model, file_path=model.__class__.__name__)
+        experiment_tracking.set_param(key=model.__class__.__name__, value=parameters)
         return {
-            'model': result[0],
-            'parameters': result[1],
+            'model': model,
+            'parameters': parameters,
             'target_column': methods_kwargs['target_column'],
             'pickle': pickle_name
         }

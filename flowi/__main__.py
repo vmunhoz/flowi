@@ -32,5 +32,5 @@ if __name__ == '__main__':
     print(flow_chart_json)
     print(type(flow_chart_json))
 
-    flow_chart = FlowChart(flow_chart_json=flow_chart_json)
+    flow_chart = FlowChart(flow_chart=flow_chart_json)
     flow_chart.run()

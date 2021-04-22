@@ -2,6 +2,7 @@ from typing import Iterable
 
 from sklearn.model_selection import ParameterGrid
 
+from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.flow_chart.node import Node
 from flowi.flow_chart.topology import Topology
 from flowi.utilities.logger import Logger
@@ -9,9 +10,10 @@ from flowi.utilities.logger import Logger
 
 class FlowChart(object):
 
-    def __init__(self, flow_chart_json: dict):
+    def __init__(self, flow_chart: dict):
         self._logger = Logger(logger_name=__name__)
-        self._flow_chart_json = flow_chart_json
+        self._flow_chart = flow_chart
+        self._experiment_tracking: ExperimentTracking = ExperimentTracking()
         self._runs_params = []
         self._parameter_tuning_types = ['Preprocessing']
         self._nodes_execution_order = []
@@ -20,8 +22,8 @@ class FlowChart(object):
         self._init_nodes()
 
     def _init_nodes(self):
-        nodes = self._flow_chart_json['nodes']
-        links = self._flow_chart_json['links']
+        nodes = self._flow_chart['nodes']
+        links = self._flow_chart['links']
 
         topology = Topology(nodes)
         for node_id in nodes:
@@ -34,11 +36,6 @@ class FlowChart(object):
 
             self._add_node(node=nodes[node_from], next_node_id=node_to)
             self._add_node(node=nodes[node_to], previous_node_id=node_from)
-
-        # for node_id in nodes:
-        #     if node_id not in self._nodes:
-        #         self._logger.warning(f'Node {node_id} is not linked to any node')
-        #         self._add_node(node=nodes[node_id])
 
         self._nodes_execution_order = topology.topological_sort()
         self._logger.debug(f"Nodes running order: {self._nodes_execution_order}")
@@ -74,6 +71,7 @@ class FlowChart(object):
     def run(self):
         for run_params in self._runs_params:
             global_variables = {}
+            self._experiment_tracking.start_run()
 
             for node_id in self._nodes_execution_order:
                 node: Node = self._nodes[node_id]
@@ -81,3 +79,5 @@ class FlowChart(object):
                 if node.type in self._parameter_tuning_types:
                     node.attributes = run_params[node_id]
                 result = node.run(global_variables=global_variables)
+
+            self._experiment_tracking.end_run()
