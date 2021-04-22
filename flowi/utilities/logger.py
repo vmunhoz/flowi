@@ -1,16 +1,18 @@
 import logging
 
+from flowi import settings
+
 _log_format = '%(name)s - %(levelname)s - %(message)s'
 _formatter = logging.Formatter(_log_format)
 
 
 class Logger(object):
 
-    def __init__(self, logger_name: str, log_level: int = logging.INFO):
+    def __init__(self, logger_name: str):
         self._logger = logging.getLogger(logger_name)
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(_formatter)
-        stream_handler.setLevel(log_level)
+        stream_handler.setLevel(settings.LOG_LEVEL)
 
         self._logger.addHandler(stream_handler)
 

@@ -12,7 +12,7 @@ FLOW_CHART = {
                 "name": "LoadFile",
                 "class": "LoadLocal",
                 "attributes": {
-                    "train_path": "iris.csv",
+                    "train_path": "tests/iris.csv",
                     "test_path": '',
                     "test_split": 0.2,
                     "file_type": "csv"
@@ -27,7 +27,7 @@ FLOW_CHART = {
                 "class": "LoadLocal",
                 "attributes": {
                     "output_df": "train_df",
-                    "train_path": "iris.csv",
+                    "train_path": "tests/iris.csv",
                     "test_path": '',
                     "test_split": 0.2,
                     "file_type": "csv"
@@ -101,14 +101,6 @@ FLOW_CHART = {
                 "nodeId": "node-fillna",
             },
         },
-        # "link-fillna-save": {
-        #     "from": {
-        #         "nodeId": "node-fillna",
-        #     },
-        #     "to": {
-        #         "nodeId": "node-save",
-        #     }
-        # },
         "link-fillna-svc": {
             "from": {
                 "nodeId": "node-fillna",

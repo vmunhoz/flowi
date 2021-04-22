@@ -23,13 +23,11 @@ class ExperimentTracking(Base, metaclass=Singleton):
     def start_run(self):
         self._experiment_tracking.start_run()
 
-    @staticmethod
-    def end_run():
-        mlflow.end_run()
+    def end_run(self):
+        self._experiment_tracking.end_run()
 
-    @staticmethod
-    def set_param(key: str, value: str or int or float):
-        mlflow.log_param(key=key, value=value)
+    def set_param(self, key: str, value: str or int or float):
+        self._experiment_tracking.set_param(key=key, value=value)
 
     @staticmethod
     def set_metric(metric_name: str, value: str or int or float):
