@@ -16,7 +16,7 @@ class Preprocessing(ComponentBase):
         experiment_tracking = ExperimentTracking()
 
         del methods_kwargs['df']
-        experiment_tracking.set_param(key=method_name, value=methods_kwargs)
+        experiment_tracking.log_transformer_param(key=method_name, value=methods_kwargs)
         return {
             'df': result
         }

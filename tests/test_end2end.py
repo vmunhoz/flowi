@@ -3,6 +3,7 @@ import os
 import flowi.settings
 from flowi.flow_chart.flow_chart import FlowChart
 
+
 FLOW_CHART = {
     "nodes": {
         "node-load-1": {
@@ -41,7 +42,7 @@ FLOW_CHART = {
                 "name": "Fillna",
                 "class": "Preprocessing",
                 "attributes": {
-                    "value": 0,
+                    "value": [0, 1],
                     "method": None,
                     "axis": "index",
                     "merge_policy": "none"
@@ -59,8 +60,30 @@ FLOW_CHART = {
                 }
             }
         },
+        "node-model-svc2": {
+            "id": "node-model-svc2",
+            "type": "Models",
+            "properties": {
+                "name": "svc",
+                "class": "Classification",
+                "attributes": {
+                    "target_column": "class"
+                }
+            }
+        },
         "node-metric-accuracy": {
             "id": "node-metric-accuracy",
+            "type": "Metrics",
+            "properties": {
+                "name": "accuracy",
+                "class": "Classification",
+                "attributes": {
+                    "target_column": "class"
+                }
+            }
+        },
+        "node-metric-accuracy2": {
+            "id": "node-metric-accuracy2",
             "type": "Metrics",
             "properties": {
                 "name": "accuracy",
@@ -109,6 +132,14 @@ FLOW_CHART = {
                 "nodeId": "node-model-svc",
             }
         },
+        "link-fillna-svc2": {
+            "from": {
+                "nodeId": "node-fillna",
+            },
+            "to": {
+                "nodeId": "node-model-svc2",
+            }
+        },
         "link-svc-accuracy": {
             "from": {
                 "nodeId": "node-model-svc",
@@ -117,9 +148,25 @@ FLOW_CHART = {
                 "nodeId": "node-metric-accuracy",
             }
         },
+        "link-svc-accuracy2": {
+            "from": {
+                "nodeId": "node-model-svc2",
+            },
+            "to": {
+                "nodeId": "node-metric-accuracy2",
+            }
+        },
         "link-accuracy-save": {
             "from": {
                 "nodeId": "node-metric-accuracy",
+            },
+            "to": {
+                "nodeId": "node-save",
+            }
+        },
+        "link-accuracy2-save": {
+            "from": {
+                "nodeId": "node-metric-accuracy2",
             },
             "to": {
                 "nodeId": "node-save",

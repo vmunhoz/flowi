@@ -6,20 +6,28 @@ import dill
 
 class Base(object):
 
-    @staticmethod
-    def start_run():
+    def __init__(self, flow_name: str, version: str):
         pass
 
-    @staticmethod
-    def end_run():
+    def set_project(self, flow_name: str):
         pass
 
-    @staticmethod
-    def set_param(key: str, value: str or int or float):
+    def start_experiment(self) -> str:
         pass
 
-    @staticmethod
-    def set_metric(key: str, value: str or int or float):
+    def end_experiment(self, experiment_id: str):
+        pass
+
+    def log_param(self, experiment_id: str, key: str, value: str or int or float):
+        pass
+
+    def log_metric(self, experiment_id: str, key: str, value: str or int or float):
+        pass
+
+    def save_transformer(self, experiment_id: str, obj: Any, file_path: str):
+        pass
+
+    def save_model(self, experiment_id: str, obj: Any, file_path: str):
         pass
 
     @staticmethod
@@ -29,11 +37,3 @@ class Base(object):
             dill.dump(obj=obj, file=f)
 
         return file_path
-
-    @abstractmethod
-    def save_transformer(self, obj: Any, file_path: str):
-        pass
-
-    @abstractmethod
-    def save_model(self, obj: Any, file_path: str):
-        pass

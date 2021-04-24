@@ -18,6 +18,7 @@ class FlowChart(object):
         self._parameter_tuning_types = ['Preprocessing']
         self._nodes_execution_order = []
         self._nodes = {}
+        self._num_experiments = 0
 
         self._init_nodes()
 
@@ -48,6 +49,8 @@ class FlowChart(object):
 
         if node_id not in self._nodes:
             self._nodes[node_id] = Node(id_=node_id, node=node, previous_node=previous_node, next_node=next_node)
+            if node['type'] == 'Models':
+                self._num_experiments += 1
         else:
             self._nodes[node_id].add_previous_node(previous_node=previous_node)
             self._nodes[node_id].add_next_node(next_node=next_node)
@@ -71,7 +74,7 @@ class FlowChart(object):
     def run(self):
         for run_params in self._runs_params:
             global_variables = {}
-            self._experiment_tracking.start_run()
+            self._experiment_tracking.reset_experiments(num_experiments=self._num_experiments)
 
             for node_id in self._nodes_execution_order:
                 node: Node = self._nodes[node_id]
@@ -80,4 +83,4 @@ class FlowChart(object):
                     node.attributes = run_params[node_id]
                 result = node.run(global_variables=global_variables)
 
-            self._experiment_tracking.end_run()
+            self._experiment_tracking.end_experiments()

@@ -5,58 +5,65 @@ import mlflow
 
 from flowi.experiment_tracking._base import Base
 from flowi.utilities.logger import Logger
+from mlflow.tracking import MlflowClient
 
 
 class MLflow(Base):
 
-    def __init__(self, flow_name: str):
-        super(MLflow, self).__init__()
+    def __init__(self, flow_name: str, version: str):
+        super(MLflow, self).__init__(flow_name=flow_name, version=version)
         self._logger = Logger(logger_name=__name__)
+        self._client = MlflowClient()
+        self._version = version
         self._experiment_id = None
 
-        self.set_experiment(flow_name=flow_name)
+        self.set_project(flow_name=flow_name)
 
-    def set_experiment(self, flow_name: str):
-        experiment = mlflow.get_experiment_by_name(flow_name)
-        if experiment:
-            self._experiment_id = experiment.experiment_id
+    def set_project(self, flow_name: str):
+        project = mlflow.get_experiment_by_name(flow_name)
+        if project:
+            self._experiment_id = project.experiment_id
             mlflow.set_experiment(flow_name)
         else:
             self._experiment_id = mlflow.create_experiment(flow_name)
 
-    def start_run(self):
-        mlflow.start_run(experiment_id=self._experiment_id)
+    def start_experiment(self) -> str:
+        run = self._client.create_run(experiment_id=self._experiment_id, tags={'version': self._version})
+        return run.info.run_id
 
-    @staticmethod
-    def end_run():
-        mlflow.end_run()
+    def end_experiment(self, experiment_id: str):
+        self._client.set_terminated(run_id=experiment_id)
 
-    @staticmethod
-    def set_param(key: str, value: str or int or float):
-        mlflow.log_param(key=key, value=value)
+    def log_param(self, experiment_id: str, key: str, value: str or int or float):
+        self._client.log_param(run_id=experiment_id, key=key, value=value)
 
-    @staticmethod
-    def set_metric(key: str, value: str or int or float):
-        mlflow.log_metric(key=key, value=value)
+    def log_metric(self, experiment_id: str, key: str, value: str or int or float):
+        self._client.log_metric(run_id=experiment_id, key=key, value=value)
 
-    def save_transformer(self, obj: Any, file_path: str):
+    def save_transformer(self, experiment_id: str, obj: Any, file_path: str):
         artifact_path = 'transformers'
         file_path = self._save_pickle(obj=obj, file_path=file_path)
 
         file_name = os.path.basename(file_path)
-        mlflow.log_artifact(local_path=file_path, artifact_path=artifact_path)
-        artifact_uri = mlflow.get_artifact_uri(artifact_path=os.path.join(artifact_path, file_name))
+        self._client.log_artifact(run_id=experiment_id, local_path=file_path, artifact_path=artifact_path)
+
+        run = self._client.get_run(run_id=experiment_id)
+        artifact_uri = os.path.join(run.info.artifact_uri, artifact_path, file_name)
+
         self._logger.debug(artifact_uri)
 
         return artifact_uri.replace('file://', '')
 
-    def save_model(self, obj: Any, file_path: str):
+    def save_model(self, experiment_id: str, obj: Any, file_path: str):
         artifact_path = 'models'
         file_path = self._save_pickle(obj=obj, file_path=file_path)
 
         file_name = os.path.basename(file_path)
-        mlflow.log_artifact(local_path=file_path, artifact_path=artifact_path)
-        artifact_uri = mlflow.get_artifact_uri(artifact_path=os.path.join(artifact_path, file_name))
+        self._client.log_artifact(run_id=experiment_id, local_path=file_path, artifact_path=artifact_path)
+
+        run = self._client.get_run(run_id=experiment_id)
+        artifact_uri = os.path.join(run.info.artifact_uri, artifact_path, file_name)
+
         self._logger.debug(artifact_uri)
 
         return artifact_uri.replace('file://', '')

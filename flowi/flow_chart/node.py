@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Any, List
 
 from flowi.components.component_base import ComponentBase
+from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.utilities.logger import Logger
 from flowi.utilities.imports import import_class
 from flowi.utilities.strings import convert_camel_to_snake
@@ -23,6 +24,7 @@ class Node(object):
         self.prediction_flow: List[dict] = []
         self.finished: bool = False
         self._logger = Logger(__name__)
+        self._experiment_tracking: ExperimentTracking = ExperimentTracking()
 
         self.attributes: dict = node['properties']['attributes']
 
@@ -51,9 +53,20 @@ class Node(object):
             'parameters': self._get_incoming_attribute('parameters'),
             'y_pred': self._get_incoming_attribute('y_pred'),
             'y_true': self._get_incoming_attribute('y_true'),
-            'has_model_selection_in_next_step': self._model_selection_in_next()
+            'has_model_selection_in_next_step': self._model_selection_in_next(),
+            'experiment_id': self._get_incoming_attribute('experiment_id')
         }
+
         return state
+
+    def set_current_experiment(self):
+        if self.type == 'Models' or self.type == 'ModelSelection':
+            experiment_id = self._experiment_tracking.get_experiment()
+            self.state['experiment_id'] = experiment_id
+        else:
+            experiment_id = self.state['experiment_id']
+
+        self._experiment_tracking.set_current_experiment(experiment_id)
 
     def _model_selection_in_next(self):
         for next_node in self.next_nodes:
@@ -82,16 +95,6 @@ class Node(object):
                 return attribute
 
         return None
-
-    def _update_result(self, result: Any, prepared_attributes: dict):
-        if type(result) == dict:
-            self.state = result
-        else:
-            self.state['train_df'] = result
-
-        for key in prepared_attributes.keys():
-            if key not in self.state.keys():
-                self.state[key] = prepared_attributes[key]
 
     def _get_incoming_prediction_flow(self):
         prediction_flow = []
@@ -125,6 +128,7 @@ class Node(object):
         component_class: ComponentBase = self._import_component()
 
         self.state = self._prepare_state()
+        self.set_current_experiment()
 
         result = component_class.apply(self.method_name, self.state, self.attributes)
         self._logger.debug(str(result))

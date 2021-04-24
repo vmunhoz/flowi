@@ -14,7 +14,7 @@ class Classification(ComponentBase):
 
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
         experiment_tracking = ExperimentTracking()
-        experiment_tracking.set_metric(metric_name=method_name, value=result)
+        experiment_tracking.log_metric(metric_name=method_name, value=result)
         return {
             f'metric_{method_name}': result
         }

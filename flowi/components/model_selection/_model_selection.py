@@ -19,7 +19,7 @@ class ModelSelection(ComponentBase):
         parameters = result[1]
 
         pickle_name = experiment_tracking.save_model(obj=model, file_path=model.__class__.__name__)
-        experiment_tracking.set_param(key=model.__class__.__name__, value=parameters)
+        experiment_tracking.log_model_param(key=model.__class__.__name__, value=parameters)
         return {
             'model': model,
             'parameters': parameters,

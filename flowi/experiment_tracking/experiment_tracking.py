@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, List
 
 import mlflow
 
@@ -10,31 +10,50 @@ import flowi.experiment_tracking
 from flowi import settings
 
 
-class ExperimentTracking(Base, metaclass=Singleton):
+class ExperimentTracking(metaclass=Singleton):
 
     def __init__(self):
-        self._logger = Logger(logger_name=__name__)
-        self._experiment_tracking = self.get_experiment_tracking()
+        self._logger: Logger = Logger(logger_name=__name__)
+        self._experiment_tracking: Base = self._get_experiment_tracking()
+        self._experiments_ids: List[str] = list()
+        self._experiments_ids_copy: List[str] = list()
+        self._current_experiment: str = ''
+
+    def reset_experiments(self, num_experiments: int):
+        self._experiments_ids = list()
+        for i in range(num_experiments):
+            experiment_id = self._experiment_tracking.start_experiment()
+            self._experiments_ids.append(experiment_id)
+        self._experiments_ids_copy = self._experiments_ids.copy()
+
+    def get_experiment(self) -> str:
+        return self._experiments_ids_copy.pop()
+
+    def set_current_experiment(self, experiment_id: str):
+        self._current_experiment = experiment_id
 
     @staticmethod
-    def get_experiment_tracking():
-        return getattr(flowi.experiment_tracking, settings.EXPERIMENT_TRACKING)(settings.FLOW_NAME)
+    def _get_experiment_tracking() -> Base:
+        return getattr(flowi.experiment_tracking, settings.EXPERIMENT_TRACKING)(settings.FLOW_NAME, settings.VERSION)
 
-    def start_run(self):
-        self._experiment_tracking.start_run()
+    def end_experiments(self):
+        for experiment_id in self._experiments_ids:
+            self._experiment_tracking.end_experiment(experiment_id=experiment_id)
 
-    def end_run(self):
-        self._experiment_tracking.end_run()
+    def log_transformer_param(self, key: str, value: str or int or float):
+        for experiment_id in self._experiments_ids:
+            self._experiment_tracking.log_param(experiment_id=experiment_id, key=key, value=value)
 
-    def set_param(self, key: str, value: str or int or float):
-        self._experiment_tracking.set_param(key=key, value=value)
+    def log_model_param(self, key: str, value: str or int or float):
+        self._experiment_tracking.log_param(experiment_id=self._current_experiment, key=key, value=value)
 
-    @staticmethod
-    def set_metric(metric_name: str, value: str or int or float):
-        mlflow.log_metric(key=metric_name, value=value)
+    def log_metric(self, metric_name: str, value: str or int or float):
+        self._experiment_tracking.log_metric(experiment_id=self._current_experiment, key=metric_name, value=value)
 
     def save_transformer(self, obj: Any, file_path: str) -> str:
-        return self._experiment_tracking.save_transformer(obj=obj, file_path=file_path)
+        return self._experiment_tracking.save_transformer(experiment_id=self._current_experiment,
+                                                          obj=obj, file_path=file_path)
 
     def save_model(self, obj: Any, file_path: str) -> str:
-        return self._experiment_tracking.save_model(obj=obj, file_path=file_path)
+        return self._experiment_tracking.save_model(experiment_id=self._current_experiment,
+                                                    obj=obj, file_path=file_path)
