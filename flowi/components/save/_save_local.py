@@ -6,7 +6,6 @@ import dask.dataframe as dd
 
 
 class SaveLocal(ComponentBase):
-
     def __init__(self):
         super().__init__()
         self._logger = Logger(logger_name=__name__)
@@ -15,12 +14,12 @@ class SaveLocal(ComponentBase):
         return dict()
 
     def save_file(self, df: dd.DataFrame, path: str, file_type: str) -> str:
-        self._logger.debug('Loading files from directory: {}'.format(path))
+        self._logger.debug("Loading files from directory: {}".format(path))
 
         return self._save(file_type=file_type)(df, path)
 
     def _save(self, file_type: str):
-        return getattr(self, '_save_' + file_type)
+        return getattr(self, "_save_" + file_type)
 
     @staticmethod
     def _save_csv(df: dd.DataFrame, path: str) -> str:

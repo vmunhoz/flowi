@@ -19,6 +19,3 @@ send -- "admin\n"
 
 
 expect eof
-
-
-

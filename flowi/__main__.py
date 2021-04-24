@@ -46,10 +46,10 @@ import json
 
 from flow_chart.flow_chart import FlowChart
 
-if __name__ == '__main__':
-    train_parser = argparse.ArgumentParser(description='Training arguments')
+if __name__ == "__main__":
+    train_parser = argparse.ArgumentParser(description="Training arguments")
 
-    train_parser.add_argument('--chart', type=json.loads, help='flow chart')
+    train_parser.add_argument("--chart", type=json.loads, help="flow chart")
     args = train_parser.parse_args()
     flow_chart_json = args.chart
 

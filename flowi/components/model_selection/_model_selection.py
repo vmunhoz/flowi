@@ -21,26 +21,31 @@ class ModelSelection(ComponentBase):
         pickle_name = experiment_tracking.save_model(obj=model, file_path=model.__class__.__name__)
         experiment_tracking.log_model_param(key=model.__class__.__name__, value=parameters)
         return {
-            'model': model,
-            'parameters': parameters,
-            'target_column': methods_kwargs['target_column'],
-            'pickle': pickle_name
+            "model": model,
+            "parameters": parameters,
+            "target_column": methods_kwargs["target_column"],
+            "pickle": pickle_name,
         }
 
-    def random_search(self, df: dd.DataFrame, target_column: str, model, parameters: dict,
-                      early_stopping: bool or str = None, n_trials: int = 10, max_iter: int = 1, cv: int = 5,
-                      verbose: int = 0):
+    def random_search(
+        self,
+        df: dd.DataFrame,
+        target_column: str,
+        model,
+        parameters: dict,
+        early_stopping: bool or str = None,
+        n_trials: int = 10,
+        max_iter: int = 1,
+        cv: int = 5,
+        verbose: int = 0,
+    ):
         sklean_data_prep = DataPreparationSKLearn()
         X, y = sklean_data_prep.prepare_train(df=df, target_column=target_column)
         tune_search = RandomizedSearchCV(
-            estimator=model,
-            param_distributions=parameters,
-            n_jobs=-1,
-            error_score=0,
-            cv=cv,
+            estimator=model, param_distributions=parameters, n_jobs=-1, error_score=0, cv=cv
         )
         tune_search.fit(X, y)
-        self._logger.debug(f'Model: {model.__class__.__name__}')
-        self._logger.debug(f'Best Parameters: {tune_search.best_params_}')
+        self._logger.debug(f"Model: {model.__class__.__name__}")
+        self._logger.debug(f"Best Parameters: {tune_search.best_params_}")
 
         return tune_search.best_estimator_, tune_search.best_params_

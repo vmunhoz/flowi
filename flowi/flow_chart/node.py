@@ -10,13 +10,12 @@ from flowi.prediction.predict import predict
 
 
 class Node(object):
-
     def __init__(self, id_: str, node: dict, previous_node: str or None, next_node: str or None):
         self.id: str = id_
-        node_type = node['type']
-        self.method_name: str = convert_camel_to_snake(node['properties']['name'])
+        node_type = node["type"]
+        self.method_name: str = convert_camel_to_snake(node["properties"]["name"])
         self.type: str = node_type
-        self.node_class = node['properties']['class']
+        self.node_class = node["properties"]["class"]
         self.previous_nodes: List[Node] = [previous_node] if previous_node is not None else []
         self.next_nodes: List[Node] = [next_node] if next_node is not None else []
         self.changed_variables: list = []
@@ -26,7 +25,7 @@ class Node(object):
         self._logger = Logger(__name__)
         self._experiment_tracking: ExperimentTracking = ExperimentTracking()
 
-        self.attributes: dict = node['properties']['attributes']
+        self.attributes: dict = node["properties"]["attributes"]
 
     def add_previous_node(self, previous_node: Node or None):
         if previous_node is not None:
@@ -38,7 +37,7 @@ class Node(object):
 
     def _get_class_name(self):
         node_type = self.type.lower()
-        return f'flowi.components.{node_type}.{self.node_class}'
+        return f"flowi.components.{node_type}.{self.node_class}"
 
     def _import_component(self):
         class_name = self._get_class_name()
@@ -47,30 +46,30 @@ class Node(object):
 
     def _prepare_state(self):
         state = {
-            'df': self._append_incoming_df(attribute_type='df'),
-            'test_df': self._append_incoming_df(attribute_type='test_df'),
-            'model': self._get_incoming_attribute('model'),
-            'parameters': self._get_incoming_attribute('parameters'),
-            'y_pred': self._get_incoming_attribute('y_pred'),
-            'y_true': self._get_incoming_attribute('y_true'),
-            'has_model_selection_in_next_step': self._model_selection_in_next(),
-            'experiment_id': self._get_incoming_attribute('experiment_id')
+            "df": self._append_incoming_df(attribute_type="df"),
+            "test_df": self._append_incoming_df(attribute_type="test_df"),
+            "model": self._get_incoming_attribute("model"),
+            "parameters": self._get_incoming_attribute("parameters"),
+            "y_pred": self._get_incoming_attribute("y_pred"),
+            "y_true": self._get_incoming_attribute("y_true"),
+            "has_model_selection_in_next_step": self._model_selection_in_next(),
+            "experiment_id": self._get_incoming_attribute("experiment_id"),
         }
 
         return state
 
     def set_current_experiment(self):
-        if self.type == 'Models' or self.type == 'ModelSelection':
+        if self.type == "Models" or self.type == "ModelSelection":
             experiment_id = self._experiment_tracking.get_experiment()
-            self.state['experiment_id'] = experiment_id
+            self.state["experiment_id"] = experiment_id
         else:
-            experiment_id = self.state['experiment_id']
+            experiment_id = self.state["experiment_id"]
 
         self._experiment_tracking.set_current_experiment(experiment_id)
 
     def _model_selection_in_next(self):
         for next_node in self.next_nodes:
-            if next_node.type == 'ModelSelection':
+            if next_node.type == "ModelSelection":
                 return True
         return False
 
@@ -103,8 +102,8 @@ class Node(object):
             for previous_node in self.previous_nodes:
                 current_prediction_flow = previous_node.prediction_flow
                 for step in current_prediction_flow:
-                    if step['id'] not in ids:
-                        ids.append(step['id'])
+                    if step["id"] not in ids:
+                        ids.append(step["id"])
                         prediction_flow.append(step)
 
         return prediction_flow
@@ -113,14 +112,17 @@ class Node(object):
         self.prediction_flow = self._get_incoming_prediction_flow()
         class_name = self._get_class_name()
 
-        if 'preprocessing' in class_name or 'model_selection' in class_name \
-                or ('model' in class_name and not self.state['has_model_selection_in_next_step']):
+        if (
+            "preprocessing" in class_name
+            or "model_selection" in class_name
+            or ("model" in class_name and not self.state["has_model_selection_in_next_step"])
+        ):
             step = {
-                'id': self.id,
-                'class_name': class_name,
-                'method_name': self.method_name,
-                'kwargs': result.get('kwargs'),
-                'pickle': result.get('pickle'),
+                "id": self.id,
+                "class_name": class_name,
+                "method_name": self.method_name,
+                "kwargs": result.get("kwargs"),
+                "pickle": result.get("pickle"),
             }
             self.prediction_flow.append(step)
 
@@ -137,13 +139,14 @@ class Node(object):
         self._update_prediction_flow(result=result)
 
         class_name = self._get_class_name()
-        if 'model_selection' in class_name \
-                or ('model' in class_name and not self.state['has_model_selection_in_next_step']):
-            df = self.state['test_df']
-            self.state['y_true'] = df[self.state['target_column']].values.compute()
+        if "model_selection" in class_name or (
+            "model" in class_name and not self.state["has_model_selection_in_next_step"]
+        ):
+            df = self.state["test_df"]
+            self.state["y_true"] = df[self.state["target_column"]].values.compute()
 
-            df = df.drop(columns=[self.state['target_column']])
-            self.state['y_pred'] = predict(x=df, prediction_flow=self.prediction_flow)
+            df = df.drop(columns=[self.state["target_column"]])
+            self.state["y_pred"] = predict(x=df, prediction_flow=self.prediction_flow)
 
         self.finished = True
 

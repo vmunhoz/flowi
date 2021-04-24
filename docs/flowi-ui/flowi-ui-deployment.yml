@@ -23,4 +23,3 @@ spec:
         env:
         - name: REACT_APP_API_V1_ENDPOINT
           value: http://flowi-ui-service
-          

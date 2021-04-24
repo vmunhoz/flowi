@@ -28,4 +28,3 @@ subjects:
 - kind: ServiceAccount
   name: spark
   namespace: default
-

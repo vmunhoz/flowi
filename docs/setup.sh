@@ -29,4 +29,3 @@ kubectl create namespace dask
 helm repo add dask https://helm.dask.org/
 helm repo update
 helm install my-dask dask/dask
-

@@ -9,13 +9,12 @@ from flowi.utilities.logger import Logger
 
 
 class FlowChart(object):
-
     def __init__(self, flow_chart: dict):
         self._logger = Logger(logger_name=__name__)
         self._flow_chart = flow_chart
         self._experiment_tracking: ExperimentTracking = ExperimentTracking()
         self._runs_params = []
-        self._parameter_tuning_types = ['Preprocessing']
+        self._parameter_tuning_types = ["Preprocessing"]
         self._nodes_execution_order = []
         self._nodes = {}
         self._num_experiments = 0
@@ -23,16 +22,16 @@ class FlowChart(object):
         self._init_nodes()
 
     def _init_nodes(self):
-        nodes = self._flow_chart['nodes']
-        links = self._flow_chart['links']
+        nodes = self._flow_chart["nodes"]
+        links = self._flow_chart["links"]
 
         topology = Topology(nodes)
         for node_id in nodes:
             self._add_node(node=nodes[node_id])
 
         for link in links:
-            node_from = links[link]['from']['nodeId']
-            node_to = links[link]['to']['nodeId']
+            node_from = links[link]["from"]["nodeId"]
+            node_to = links[link]["to"]["nodeId"]
             topology.add_edge(node_from=node_from, node_to=node_to)
 
             self._add_node(node=nodes[node_from], next_node_id=node_to)
@@ -43,13 +42,13 @@ class FlowChart(object):
         self.generate_runs()
 
     def _add_node(self, node: dict, previous_node_id: str or None = None, next_node_id: str or None = None):
-        node_id = node['id']
+        node_id = node["id"]
         previous_node = self._nodes.get(previous_node_id, None)
         next_node = self._nodes.get(next_node_id, None)
 
         if node_id not in self._nodes:
             self._nodes[node_id] = Node(id_=node_id, node=node, previous_node=previous_node, next_node=next_node)
-            if node['type'] == 'Models':
+            if node["type"] == "Models":
                 self._num_experiments += 1
         else:
             self._nodes[node_id].add_previous_node(previous_node=previous_node)
@@ -78,9 +77,9 @@ class FlowChart(object):
 
             for node_id in self._nodes_execution_order:
                 node: Node = self._nodes[node_id]
-                self._logger.info(f'Processing node {node_id} | {node.type} - {node.method_name}')
+                self._logger.info(f"Processing node {node_id} | {node.type} - {node.method_name}")
                 if node.type in self._parameter_tuning_types:
                     node.attributes = run_params[node_id]
-                result = node.run(global_variables=global_variables)
+                node.run(global_variables=global_variables)
 
             self._experiment_tracking.end_experiments()

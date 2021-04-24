@@ -41,5 +41,3 @@ helm upgrade --install dask dask/dask  --values values.yaml  -n flowi
 #because they are installed before their respective services start.
 #
 #NOTE: The default password to login to the notebook server is `dask`. To change this password, refer to the Jupyter password section in values.yaml, or in the README.md.
-
-

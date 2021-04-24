@@ -11,7 +11,7 @@ def _unset_variable(variable_name: str):
         del os.environ[variable_name]
 
 
-FLOW_NAME = _get_env(variable_name='FLOW_NAME')
-VERSION = _get_env(variable_name='VERSION', default='not versioned')
-EXPERIMENT_TRACKING = _get_env(variable_name='EXPERIMENT_TRACKING')
-LOG_LEVEL = _get_env(variable_name='LOG_LEVEL', default=logging.INFO)
+FLOW_NAME = _get_env(variable_name="FLOW_NAME")
+VERSION = _get_env(variable_name="VERSION", default="not versioned")
+EXPERIMENT_TRACKING = _get_env(variable_name="EXPERIMENT_TRACKING")
+LOG_LEVEL = _get_env(variable_name="LOG_LEVEL", default=logging.INFO)

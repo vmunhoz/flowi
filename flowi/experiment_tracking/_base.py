@@ -5,7 +5,6 @@ import dill
 
 
 class Base(object):
-
     def __init__(self, flow_name: str, version: str):
         pass
 
@@ -32,8 +31,8 @@ class Base(object):
 
     @staticmethod
     def _save_pickle(obj: Any, file_path: str) -> str:
-        file_path = file_path if file_path.endswith('.pkl') else file_path + '.pkl'
-        with open(file_path, 'wb') as f:
+        file_path = file_path if file_path.endswith(".pkl") else file_path + ".pkl"
+        with open(file_path, "wb") as f:
             dill.dump(obj=obj, file=f)
 
         return file_path

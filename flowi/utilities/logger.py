@@ -2,12 +2,11 @@ import logging
 
 from flowi import settings
 
-_log_format = '%(name)s - %(levelname)s - %(message)s'
+_log_format = "%(name)s - %(levelname)s - %(message)s"
 _formatter = logging.Formatter(_log_format)
 
 
 class Logger(object):
-
     def __init__(self, logger_name: str):
         self._logger = logging.getLogger(logger_name)
         stream_handler = logging.StreamHandler()

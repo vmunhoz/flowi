@@ -13,16 +13,18 @@ def predict(x: dd.DataFrame or np.array, prediction_flow: List[dict]):
         df = x
 
     for step in prediction_flow:
-        component_class = import_class(step['class_name'])()
-        if step['pickle'] is None:
-            kwargs = step['kwargs']
-            result = component_class.apply(method_name=step['method_name'], shared_variables={'df': df}, node_attributes=kwargs)
-            df = result['df']
+        component_class = import_class(step["class_name"])()
+        if step["pickle"] is None:
+            kwargs = step["kwargs"]
+            result = component_class.apply(
+                method_name=step["method_name"], shared_variables={"df": df}, node_attributes=kwargs
+            )
+            df = result["df"]
         else:
-            transformer = load(open(step['pickle'], 'rb'))
-            if 'model' not in step['class_name']:
+            transformer = load(open(step["pickle"], "rb"))
+            if "model" not in step["class_name"]:
                 df = transformer.transform()
             else:
                 return transformer.predict(df.values)
 
-    raise BrokenPipeError('Missing model to predict')
+    raise BrokenPipeError("Missing model to predict")

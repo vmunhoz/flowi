@@ -5,23 +5,21 @@ from flowi.utilities.singleton import Singleton
 
 
 class ComponentBase(metaclass=Singleton):
-
     def apply(self, method_name: str, shared_variables: dict, node_attributes: dict) -> dict:
-        kwargs = self._mount_args(method_name=method_name,
-                                  shared_variables=shared_variables,
-                                  node_attributes=node_attributes
-                                  )
+        kwargs = self._mount_args(
+            method_name=method_name, shared_variables=shared_variables, node_attributes=node_attributes
+        )
 
         result = getattr(self, method_name)(**kwargs)
 
         result = self._set_output(method_name=method_name, result=result, methods_kwargs=kwargs)
-        if 'df' in kwargs:
-            del kwargs['df']
-        result['kwargs'] = kwargs
+        if "df" in kwargs:
+            del kwargs["df"]
+        result["kwargs"] = kwargs
         return result
 
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
-        raise NotImplementedError('Component has to set a output policy')
+        raise NotImplementedError("Component has to set a output policy")
 
     @staticmethod
     def _get_variable(param_name: str, default_value: Any, node_attributes: dict, shared_variables: dict):
@@ -32,7 +30,7 @@ class ComponentBase(metaclass=Singleton):
             return shared_variables[param_name]
 
         if isinstance(default_value, type(inspect.Signature.empty)):
-            raise ValueError(f'Missing value for {param_name}')
+            raise ValueError(f"Missing value for {param_name}")
 
         return default_value
 
@@ -46,11 +44,12 @@ class ComponentBase(metaclass=Singleton):
             param_name = param_signature.name
             default_value = param_signature.default
 
-            value = self._get_variable(param_name=param_name,
-                                       default_value=default_value,
-                                       node_attributes=node_attributes,
-                                       shared_variables=shared_variables
-                                       )
+            value = self._get_variable(
+                param_name=param_name,
+                default_value=default_value,
+                node_attributes=node_attributes,
+                shared_variables=shared_variables,
+            )
 
             args[param_name] = value
 

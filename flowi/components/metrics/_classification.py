@@ -15,12 +15,10 @@ class Classification(ComponentBase):
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
         experiment_tracking = ExperimentTracking()
         experiment_tracking.log_metric(metric_name=method_name, value=result)
-        return {
-            f'metric_{method_name}': result
-        }
+        return {f"metric_{method_name}": result}
 
     def accuracy(self, y_pred: np.array, y_true: np.array):
         accuracy = accuracy_score(y_true=y_true, y_pred=y_pred)
-        self._logger.debug(f'Accuracy: {accuracy}')
+        self._logger.debug(f"Accuracy: {accuracy}")
 
         return accuracy

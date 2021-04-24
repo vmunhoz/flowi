@@ -20,7 +20,25 @@ toml = "^0.10.2"
 pytest = "^5.2"
 pytest-cov = "^2.11.1"
 pytest-mock = "^3.5.1"
+pre-commit = "^2.12.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''

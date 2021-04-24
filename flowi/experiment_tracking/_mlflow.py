@@ -9,7 +9,6 @@ from mlflow.tracking import MlflowClient
 
 
 class MLflow(Base):
-
     def __init__(self, flow_name: str, version: str):
         super(MLflow, self).__init__(flow_name=flow_name, version=version)
         self._logger = Logger(logger_name=__name__)
@@ -28,7 +27,7 @@ class MLflow(Base):
             self._experiment_id = mlflow.create_experiment(flow_name)
 
     def start_experiment(self) -> str:
-        run = self._client.create_run(experiment_id=self._experiment_id, tags={'version': self._version})
+        run = self._client.create_run(experiment_id=self._experiment_id, tags={"version": self._version})
         return run.info.run_id
 
     def end_experiment(self, experiment_id: str):
@@ -41,7 +40,7 @@ class MLflow(Base):
         self._client.log_metric(run_id=experiment_id, key=key, value=value)
 
     def save_transformer(self, experiment_id: str, obj: Any, file_path: str):
-        artifact_path = 'transformers'
+        artifact_path = "transformers"
         file_path = self._save_pickle(obj=obj, file_path=file_path)
 
         file_name = os.path.basename(file_path)
@@ -52,10 +51,10 @@ class MLflow(Base):
 
         self._logger.debug(artifact_uri)
 
-        return artifact_uri.replace('file://', '')
+        return artifact_uri.replace("file://", "")
 
     def save_model(self, experiment_id: str, obj: Any, file_path: str):
-        artifact_path = 'models'
+        artifact_path = "models"
         file_path = self._save_pickle(obj=obj, file_path=file_path)
 
         file_name = os.path.basename(file_path)
@@ -66,4 +65,4 @@ class MLflow(Base):
 
         self._logger.debug(artifact_uri)
 
-        return artifact_uri.replace('file://', '')
+        return artifact_uri.replace("file://", "")

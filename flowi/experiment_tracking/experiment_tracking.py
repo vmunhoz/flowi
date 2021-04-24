@@ -11,13 +11,12 @@ from flowi import settings
 
 
 class ExperimentTracking(metaclass=Singleton):
-
     def __init__(self):
         self._logger: Logger = Logger(logger_name=__name__)
         self._experiment_tracking: Base = self._get_experiment_tracking()
         self._experiments_ids: List[str] = list()
         self._experiments_ids_copy: List[str] = list()
-        self._current_experiment: str = ''
+        self._current_experiment: str = ""
 
     def reset_experiments(self, num_experiments: int):
         self._experiments_ids = list()
@@ -51,9 +50,11 @@ class ExperimentTracking(metaclass=Singleton):
         self._experiment_tracking.log_metric(experiment_id=self._current_experiment, key=metric_name, value=value)
 
     def save_transformer(self, obj: Any, file_path: str) -> str:
-        return self._experiment_tracking.save_transformer(experiment_id=self._current_experiment,
-                                                          obj=obj, file_path=file_path)
+        return self._experiment_tracking.save_transformer(
+            experiment_id=self._current_experiment, obj=obj, file_path=file_path
+        )
 
     def save_model(self, obj: Any, file_path: str) -> str:
-        return self._experiment_tracking.save_model(experiment_id=self._current_experiment,
-                                                    obj=obj, file_path=file_path)
+        return self._experiment_tracking.save_model(
+            experiment_id=self._current_experiment, obj=obj, file_path=file_path
+        )
