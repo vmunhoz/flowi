@@ -1,9 +1,34 @@
 from typing import List
-from pickle import load
+from pickle import load, loads
 import numpy as np
+import boto3
+from botocore.client import Config
 
+from flowi.settings import MLFLOW_S3_ENDPOINT_URL
 from flowi.utilities.imports import import_class
 import dask.dataframe as dd
+
+
+def _load_from_file(pickle_path: str):
+    return load(open(pickle_path, "rb"))
+
+
+def _load_from_s3(pickle_path: str):
+    pickle_path = pickle_path.replace("s3://", "")
+    bucket = pickle_path.split("/")[0]
+    s3_path = pickle_path.replace(bucket + "/", "")
+
+    s3 = boto3.resource("s3", endpoint_url=MLFLOW_S3_ENDPOINT_URL, config=Config(signature_version="s3v4"))
+
+    s3_response_object = s3.meta.client.get_object(Bucket=bucket, Key=s3_path)
+    return loads(s3_response_object["Body"].read())
+
+
+def _load_transformer(pickle_path: str):
+    if pickle_path.startswith("file://"):
+        return _load_from_file(pickle_path=pickle_path)
+    elif pickle_path.startswith("s3://"):
+        return _load_from_s3(pickle_path=pickle_path)
 
 
 def predict(x: dd.DataFrame or np.array, prediction_flow: List[dict]):
@@ -21,7 +46,7 @@ def predict(x: dd.DataFrame or np.array, prediction_flow: List[dict]):
             )
             df = result["df"]
         else:
-            transformer = load(open(step["pickle"], "rb"))
+            transformer = _load_transformer(step["pickle"])
             if "model" not in step["class_name"]:
                 df = transformer.transform()
             else:

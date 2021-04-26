@@ -51,7 +51,7 @@ class MLflow(Base):
 
         self._logger.debug(artifact_uri)
 
-        return artifact_uri.replace("file://", "")
+        return artifact_uri
 
     def save_model(self, experiment_id: str, obj: Any, file_path: str):
         artifact_path = "models"
@@ -65,4 +65,4 @@ class MLflow(Base):
 
         self._logger.debug(artifact_uri)
 
-        return artifact_uri.replace("file://", "")
+        return artifact_uri
