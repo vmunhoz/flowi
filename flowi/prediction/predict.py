@@ -10,6 +10,7 @@ import dask.dataframe as dd
 
 
 def _load_from_file(pickle_path: str):
+    pickle_path = pickle_path.replace("file://", "")
     return load(open(pickle_path, "rb"))
 
 
