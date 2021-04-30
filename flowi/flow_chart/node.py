@@ -6,7 +6,7 @@ from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.utilities.logger import Logger
 from flowi.utilities.imports import import_class
 from flowi.utilities.strings import convert_camel_to_snake
-from flowi.prediction.predict import predict
+from flowi.prediction.predict import Predict
 
 
 class Node(object):
@@ -126,6 +126,24 @@ class Node(object):
             }
             self.prediction_flow.append(step)
 
+    def predict_if_necessary(self):
+        class_name = self._get_class_name()
+        if "model_selection" in class_name or (
+            "model" in class_name and not self.state["has_model_selection_in_next_step"]
+        ):
+            df = self.state["test_df"]
+            self.state["y_true"] = df[self.state["target_column"]].values.compute()
+
+            df = df.drop(columns=[self.state["target_column"]])
+
+            for element in self.prediction_flow:
+                if "pickle" in element and isinstance(element["pickle"], dict):
+                    element["pickle"] = element["pickle"][self.state["experiment_id"]]
+
+            predict = Predict(prediction_flow=self.prediction_flow)
+            X = predict.transform_input(X=df)
+            self.state["y_pred"] = predict.predict(X=X)
+
     def run(self, global_variables: dict):
         component_class: ComponentBase = self._import_component()
 
@@ -138,15 +156,7 @@ class Node(object):
         self.state.update(result)
         self._update_prediction_flow(result=result)
 
-        class_name = self._get_class_name()
-        if "model_selection" in class_name or (
-            "model" in class_name and not self.state["has_model_selection_in_next_step"]
-        ):
-            df = self.state["test_df"]
-            self.state["y_true"] = df[self.state["target_column"]].values.compute()
-
-            df = df.drop(columns=[self.state["target_column"]])
-            self.state["y_pred"] = predict(x=df, prediction_flow=self.prediction_flow)
+        self.predict_if_necessary()
 
         self.finished = True
 

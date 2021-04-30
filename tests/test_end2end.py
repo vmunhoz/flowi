@@ -33,11 +33,7 @@ FLOW_CHART = {
         "node-fillna": {
             "id": "node-fillna",
             "type": "Preprocessing",
-            "properties": {
-                "name": "Fillna",
-                "class": "Preprocessing",
-                "attributes": {"value": [0, 1], "method": None, "axis": "index", "merge_policy": "none"},
-            },
+            "properties": {"name": "Fillna", "class": "Preprocessing", "attributes": {"strategy": ["mean", "median"]}},
         },
         "node-model-svc": {
             "id": "node-model-svc",
