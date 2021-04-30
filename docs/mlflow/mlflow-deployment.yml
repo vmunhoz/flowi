@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow-deployment
+  namespace: flowi
+  labels:
+    app: mlflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      containers:
+      - name: mlflow
+        image: localhost:32000/mlflow
+        ports:
+        - containerPort: 5000
+        env:
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: minio-service
+        - name: BUCKET
+          value: mlflow
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: flowi-secrets
+              key: minio-access-key
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flowi-secrets
+              key: minio-secret-key
+        - name: MYSQL_HOST
+          value: mysql-service
+        - name: MYSQL_DATABASE
+          value: mlflow
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: flowi-secrets
+              key: mysql-user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: flowi-secrets
+              key: mysql-password
