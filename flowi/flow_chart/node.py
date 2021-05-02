@@ -6,6 +6,7 @@ from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.prediction.prediction_flow import create_transform_pipeline
 from flowi.utilities.logger import Logger
 from flowi.utilities.imports import import_class
+from flowi.utilities.mongo import Mongo
 from flowi.utilities.strings import convert_camel_to_snake
 
 
@@ -24,6 +25,7 @@ class Node(object):
         self.finished: bool = False
         self._logger = Logger(__name__)
         self._experiment_tracking: ExperimentTracking = ExperimentTracking()
+        self._mongo = Mongo()
 
         self.attributes: dict = node["properties"]["attributes"]
 
@@ -54,6 +56,7 @@ class Node(object):
             "y_true": self._get_incoming_attribute("y_true"),
             "has_model_selection_in_next_step": self._model_selection_in_next(),
             "experiment_id": self._get_incoming_attribute("experiment_id"),
+            "mongo_id": self._get_incoming_attribute("mongo_id"),
         }
 
         return state
@@ -132,6 +135,8 @@ class Node(object):
         if "model_selection" in class_name or (
             "model" in class_name and not self.state["has_model_selection_in_next_step"]
         ):
+            self.state["mongo_id"] = self._mongo.insert(experiment_id=self.state["experiment_id"])
+
             df = self.state["test_df"]
             self.state["y_true"] = df[self.state["target_column"]].values.compute()
 
@@ -176,3 +181,6 @@ class Node(object):
 
     def post_run(self):
         self.predict_if_necessary()
+        if self.type == "Metrics":
+            value = self.state[f"metric_{self.method_name}"]
+            self._mongo.update(mongo_id=self.state["mongo_id"], metric_name=self.method_name, value=value)
