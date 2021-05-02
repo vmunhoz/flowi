@@ -3,10 +3,10 @@ from typing import Any, List
 
 from flowi.components.component_base import ComponentBase
 from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
+from flowi.prediction.prediction_flow import create_transform_pipeline
 from flowi.utilities.logger import Logger
 from flowi.utilities.imports import import_class
 from flowi.utilities.strings import convert_camel_to_snake
-from flowi.prediction.predict import Predict
 
 
 class Node(object):
@@ -121,8 +121,9 @@ class Node(object):
                 "id": self.id,
                 "class_name": class_name,
                 "method_name": self.method_name,
-                "kwargs": result.get("kwargs"),
-                "pickle": result.get("pickle"),
+                "object": result.get("object"),
+                "transform_input": result.get("transform_input"),
+                "transform_output": result.get("transform_output"),
             }
             self.prediction_flow.append(step)
 
@@ -135,29 +136,43 @@ class Node(object):
             self.state["y_true"] = df[self.state["target_column"]].values.compute()
 
             df = df.drop(columns=[self.state["target_column"]])
+            X = df
 
-            for element in self.prediction_flow:
-                if "pickle" in element and isinstance(element["pickle"], dict):
-                    element["pickle"] = element["pickle"][self.state["experiment_id"]]
+            input_transformer = create_transform_pipeline(
+                prediction_flow=self.prediction_flow, transform_type="transform_input"
+            )
+            if input_transformer is not None:
+                self._experiment_tracking.save_transformer(obj=input_transformer, file_path="input_transformer")
+                X = input_transformer.transform(X=df)
 
-            predict = Predict(prediction_flow=self.prediction_flow)
-            X = predict.transform_input(X=df)
-            self.state["y_pred"] = predict.predict(X=X)
+            y_pred = self.state["model"].predict(X=X)
 
-    def run(self, global_variables: dict):
-        component_class: ComponentBase = self._import_component()
+            output_transformer = create_transform_pipeline(
+                prediction_flow=self.prediction_flow, transform_type="transform_output"
+            )
+            if output_transformer is not None:
+                self._experiment_tracking.save_transformer(obj=output_transformer, file_path="output_transformer")
+                y_pred = output_transformer.transform(X=y_pred)
 
+            self.state["y_pred"] = y_pred
+
+    def _pre_run(self):
         self.state = self._prepare_state()
         self.set_current_experiment()
 
+    def run(self, global_variables: dict):
+        component_class: ComponentBase = self._import_component()
+        self._pre_run()
+
         result = component_class.apply(self.method_name, self.state, self.attributes)
-        self._logger.debug(str(result))
 
         self.state.update(result)
         self._update_prediction_flow(result=result)
 
-        self.predict_if_necessary()
-
+        self.post_run()
         self.finished = True
 
         return result
+
+    def post_run(self):
+        self.predict_if_necessary()

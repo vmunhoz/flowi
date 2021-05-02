@@ -23,9 +23,8 @@ class Preprocessing(ComponentBase):
         transformer = result[1]
         method_name = "_".join([method_name, str(id(transformer))])
 
-        pickle_name = experiment_tracking.save_transformer(obj=transformer, file_path=method_name)
         experiment_tracking.log_transformer_param(key=method_name, value=methods_kwargs)
-        return {"df": df, "pickle": pickle_name}
+        return {"df": df, "object": transformer, "transform_input": True}
 
     def fillna(
         self,

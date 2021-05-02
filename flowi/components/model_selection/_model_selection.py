@@ -18,13 +18,13 @@ class ModelSelection(ComponentBase):
         model = result[0]
         parameters = result[1]
 
-        pickle_name = experiment_tracking.save_model(obj=model, file_path=model.__class__.__name__)
+        experiment_tracking.save_model(obj=model, file_path="model")
         experiment_tracking.log_model_param(key=model.__class__.__name__, value=parameters)
         return {
             "model": model,
             "parameters": parameters,
             "target_column": methods_kwargs["target_column"],
-            "pickle": pickle_name,
+            "object": model,
         }
 
     def random_search(

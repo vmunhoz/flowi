@@ -15,7 +15,7 @@ class ComponentBase(metaclass=Singleton):
         result = self._set_output(method_name=method_name, result=result, methods_kwargs=kwargs)
         if "df" in kwargs:
             del kwargs["df"]
-        result["kwargs"] = kwargs
+
         return result
 
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:

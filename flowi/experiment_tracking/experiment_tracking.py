@@ -49,15 +49,8 @@ class ExperimentTracking(metaclass=Singleton):
     def log_metric(self, metric_name: str, value: str or int or float):
         self._experiment_tracking.log_metric(experiment_id=self._current_experiment, key=metric_name, value=value)
 
-    def save_transformer(self, obj: Any, file_path: str) -> dict:
-        artifact_uris = dict()
-        for experiment_id in self._experiments_ids:
-            artifact_uri = self._experiment_tracking.save_transformer(
-                experiment_id=experiment_id, obj=obj, file_path=file_path
-            )
-            artifact_uris[experiment_id] = artifact_uri
-
-        return artifact_uris
+    def save_transformer(self, obj: Any, file_path: str):
+        self._experiment_tracking.save_transformer(experiment_id=self._current_experiment, obj=obj, file_path=file_path)
 
     def save_model(self, obj: Any, file_path: str) -> str:
         return self._experiment_tracking.save_model(
