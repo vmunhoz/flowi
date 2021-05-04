@@ -91,12 +91,11 @@ FLOW_CHART = {
 }
 
 
-@mongomock.patch(servers=(("none", 27017),))
 def test_end_to_end(mocker):
     mocker.patch.object(flowi.settings, "FLOW_NAME", "End2End Test Flow")
     mocker.patch.object(flowi.settings, "EXPERIMENT_TRACKING", "MLflow")
     with mock.patch("flowi.flow_chart.node.Mongo") as mongo:
-        mongo.assignment = {"_client": pymongo.MongoClient("none")}
+        mongo.assignment = {"_client": pymongo.MongoClient()}
 
         flow_chart = FlowChart(flow_chart=FLOW_CHART)
         flow_chart.run()
