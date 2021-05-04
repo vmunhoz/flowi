@@ -1,4 +1,8 @@
 import os
+from unittest import mock
+
+import mongomock
+import pymongo
 
 import flowi.settings
 from flowi.flow_chart.flow_chart import FlowChart
@@ -87,10 +91,13 @@ FLOW_CHART = {
 }
 
 
+@mongomock.patch(servers=(("none", 27017),))
 def test_end_to_end(mocker):
     mocker.patch.object(flowi.settings, "FLOW_NAME", "End2End Test Flow")
     mocker.patch.object(flowi.settings, "EXPERIMENT_TRACKING", "MLflow")
+    with mock.patch("flowi.flow_chart.node.Mongo") as mongo:
+        mongo.assignment = {"_client": pymongo.MongoClient("none")}
 
-    flow_chart = FlowChart(flow_chart=FLOW_CHART)
-    flow_chart.run()
-    os.remove("saved.csv")
+        flow_chart = FlowChart(flow_chart=FLOW_CHART)
+        flow_chart.run()
+        os.remove("saved.csv")

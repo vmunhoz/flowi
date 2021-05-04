@@ -519,6 +519,18 @@ extras = ["scikit-learn", "pyarrow", "boto3", "mleap", "google-cloud-storage", "
 sqlserver = ["mlflow-dbstore"]
 
 [[package]]
+name = "mongomock"
+version = "3.22.1"
+description = "Fake pymongo stub for testing simple MongoDB-dependent code"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+sentinels = "*"
+six = "*"
+
+[[package]]
 name = "more-itertools"
 version = "8.7.0"
 description = "More routines for operating on iterables, beyond itertools"
@@ -890,6 +902,14 @@ python-versions = ">=3.7"
 numpy = ">=1.16.5"
 
 [[package]]
+name = "sentinels"
+version = "1.0.0"
+description = "Various objects to denote special meanings in python"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1099,7 +1119,7 @@ heapdict = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "70c3912cf28834e3979a465a1cdf8dcaf5973188f9706555de78510be1d3dd83"
+content-hash = "70196325120b68fda30232546dfd5c2b08f8cc92e8f13de50bf73f003c89a669"
 
 [metadata.files]
 alembic = [
@@ -1418,6 +1438,10 @@ markupsafe = [
 mlflow = [
     {file = "mlflow-1.15.0-py3-none-any.whl", hash = "sha256:ca9cc2f654d705640df78b2148c3c77559c501465bb80b6fd85c9bce0d55a770"},
     {file = "mlflow-1.15.0.tar.gz", hash = "sha256:12eaeb74a4c78713d549c3ae76f3889ac3ac25849bd1b069fe901c2f11e3dc78"},
+]
+mongomock = [
+    {file = "mongomock-3.22.1-py2.py3-none-any.whl", hash = "sha256:c721a7b8ce3ae44442de3cf314a89f4be3fe65bd337d8e7d0d909d8af0d1584e"},
+    {file = "mongomock-3.22.1.tar.gz", hash = "sha256:70d6d0d5e4c4e225eb46a109c527c2388e54f684b6d32bdb4718c0618ecec168"},
 ]
 more-itertools = [
     {file = "more-itertools-8.7.0.tar.gz", hash = "sha256:c5d6da9ca3ff65220c3bfd2a8db06d698f05d4d2b9be57e1deb2be5a45019713"},
@@ -1812,6 +1836,9 @@ scipy = [
     {file = "scipy-1.6.1-cp39-cp39-win32.whl", hash = "sha256:8e403a337749ed40af60e537cc4d4c03febddcc56cd26e774c9b1b600a70d3e4"},
     {file = "scipy-1.6.1-cp39-cp39-win_amd64.whl", hash = "sha256:a5193a098ae9f29af283dcf0041f762601faf2e595c0db1da929875b7570353f"},
     {file = "scipy-1.6.1.tar.gz", hash = "sha256:c4fceb864890b6168e79b0e714c585dbe2fd4222768ee90bc1aa0f8218691b11"},
+]
+sentinels = [
+    {file = "sentinels-1.0.0.tar.gz", hash = "sha256:7be0704d7fe1925e397e92d18669ace2f619c92b5d4eb21a89f31e026f9ff4b1"},
 ]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
