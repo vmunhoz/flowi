@@ -115,10 +115,9 @@ class Node(object):
         self.prediction_flow = self._get_incoming_prediction_flow()
         class_name = self._get_class_name()
 
-        if (
-            "preprocessing" in class_name
-            or "model_selection" in class_name
-            or ("model" in class_name and not self.state["has_model_selection_in_next_step"])
+        if not (
+            self.type in ["Load", "Metrics"]
+            or (self.type == "Model" and not self.state["has_model_selection_in_next_step"])
         ):
             step = {
                 "id": self.id,
@@ -138,7 +137,7 @@ class Node(object):
             self.state["mongo_id"] = self._mongo.insert(experiment_id=self.state["experiment_id"])
 
             df = self.state["test_df"]
-            self.state["y_true"] = df[self.state["target_column"]].values.compute()
+            y_true = df[self.state["target_column"]].values.compute()
 
             df = df.drop(columns=[self.state["target_column"]])
             X = df
@@ -157,9 +156,10 @@ class Node(object):
             )
             if output_transformer is not None:
                 self._experiment_tracking.save_transformer(obj=output_transformer, file_path="output_transformer")
-                y_pred = output_transformer.transform(X=y_pred)
+                y_pred = output_transformer.inverse_transform(X=y_pred)
 
             self.state["y_pred"] = y_pred
+            self.state["y_true"] = y_true
 
     def _pre_run(self):
         self.state = self._prepare_state()

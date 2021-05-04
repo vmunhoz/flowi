@@ -3,7 +3,6 @@ import os
 import flowi.settings
 from flowi.flow_chart.flow_chart import FlowChart
 
-
 FLOW_CHART = {
     "nodes": {
         "node-load-1": {
@@ -34,6 +33,15 @@ FLOW_CHART = {
             "id": "node-fillna",
             "type": "Preprocessing",
             "properties": {"name": "Fillna", "class": "Preprocessing", "attributes": {"strategy": ["mean", "median"]}},
+        },
+        "node-label-enc": {
+            "id": "node-label-enc",
+            "type": "Label",
+            "properties": {
+                "name": "LabelEncoder",
+                "class": "Label",
+                "attributes": {"target_column": "class", "is_label": True},
+            },
         },
         "node-model-svc": {
             "id": "node-model-svc",
@@ -66,8 +74,9 @@ FLOW_CHART = {
         },
     },
     "links": {
-        "link-load-fillna-1": {"from": {"nodeId": "node-load-1"}, "to": {"nodeId": "node-fillna"}},
-        "link-load-fillna-2": {"from": {"nodeId": "node-load-2"}, "to": {"nodeId": "node-fillna"}},
+        "link-load-fillna-1": {"from": {"nodeId": "node-load-1"}, "to": {"nodeId": "node-label-enc"}},
+        "link-load-fillna-2": {"from": {"nodeId": "node-load-2"}, "to": {"nodeId": "node-label-enc"}},
+        "link-label-enc-fillna": {"from": {"nodeId": "node-label-enc"}, "to": {"nodeId": "node-fillna"}},
         "link-fillna-svc": {"from": {"nodeId": "node-fillna"}, "to": {"nodeId": "node-model-svc"}},
         "link-fillna-svc2": {"from": {"nodeId": "node-fillna"}, "to": {"nodeId": "node-model-svc2"}},
         "link-svc-accuracy": {"from": {"nodeId": "node-model-svc"}, "to": {"nodeId": "node-metric-accuracy"}},
