@@ -1,7 +1,6 @@
 import os
 from unittest import mock
 
-import mongomock
 import pymongo
 
 import flowi.settings
