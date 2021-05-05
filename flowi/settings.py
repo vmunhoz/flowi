@@ -1,5 +1,6 @@
 import logging
 import os
+import uuid
 
 
 def _get_env(variable_name: str, default=None):
@@ -13,6 +14,7 @@ def _unset_variable(variable_name: str):
 
 FLOW_NAME = _get_env(variable_name="FLOW_NAME")
 VERSION = _get_env(variable_name="VERSION", default="not versioned")
+RUN_ID = _get_env(variable_name="RUN_ID", default=uuid.uuid4())
 EXPERIMENT_TRACKING = _get_env(variable_name="EXPERIMENT_TRACKING")
 MLFLOW_S3_ENDPOINT_URL = _get_env(variable_name="MLFLOW_S3_ENDPOINT_URL")
 MONGO_ENDPOINT_URL = _get_env(variable_name="MONGO_ENDPOINT_URL")
