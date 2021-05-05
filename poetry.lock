@@ -1216,7 +1216,7 @@ heapdict = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "82a4509e68a1a7193823f383838435adedd49b53c34b110165444f0e0ec2a6f5"
+content-hash = "168f3d8c62270175cd40d8d89f4118a56a6bcfa1e1aa6a29e80970fa52849332"
 
 [metadata.files]
 aiobotocore = [
