@@ -8,6 +8,9 @@ import argparse
 import json
 
 from flowi.flow_chart.flow_chart import FlowChart
+from dask.distributed import Client
+
+from flowi.settings import DASK_SCHEDULER
 
 if __name__ == "__main__":
     train_parser = argparse.ArgumentParser(description="Training arguments")
@@ -16,5 +19,6 @@ if __name__ == "__main__":
     args = train_parser.parse_args()
     flow_chart_json = args.chart
 
+    Client(address=DASK_SCHEDULER)
     flow_chart = FlowChart(flow_chart=flow_chart_json)
     flow_chart.run()

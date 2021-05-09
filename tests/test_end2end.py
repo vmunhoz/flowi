@@ -2,9 +2,11 @@ import os
 from unittest import mock
 
 import pymongo
+from dask.distributed import Client
 
 import flowi.settings
 from flowi.flow_chart.flow_chart import FlowChart
+from flowi.settings import DASK_SCHEDULER
 
 FLOW_CHART = {
     "nodes": {
@@ -93,6 +95,7 @@ FLOW_CHART = {
 def test_end_to_end(mocker):
     mocker.patch.object(flowi.settings, "FLOW_NAME", "End2End Test Flow")
     mocker.patch.object(flowi.settings, "EXPERIMENT_TRACKING", "MLflow")
+    Client(address=DASK_SCHEDULER)
     with mock.patch("flowi.flow_chart.node.Mongo") as mongo:
         mongo.assignment = {"_client": pymongo.MongoClient()}
 

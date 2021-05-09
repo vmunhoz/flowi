@@ -19,4 +19,5 @@ EXPERIMENT_TRACKING = _get_env(variable_name="EXPERIMENT_TRACKING", default="MLf
 S3_ENDPOINT_URL = _get_env(variable_name="MLFLOW_S3_ENDPOINT_URL")
 FLOWI_BUCKET = _get_env(variable_name="FLOWI_BUCKET", default="flowi")
 MONGO_ENDPOINT_URL = _get_env(variable_name="MONGO_ENDPOINT_URL")
+DASK_SCHEDULER = _get_env(variable_name="DASK_SCHEDULER", default=None)
 LOG_LEVEL = _get_env(variable_name="LOG_LEVEL", default="INFO")

@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 
 from airflow import DAG
@@ -16,7 +17,8 @@ default_args = {
 }
 
 dag = DAG("FlowiTrainDask", default_args=default_args, catchup=False, schedule_interval="@daily")
-
+flowi_run_id = str(uuid.uuid4())
+flow_name = "Iris"
 
 volumes = [
     k8s.V1Volume(name="data-volume", host_path=k8s.V1HostPathVolumeSource(path="/tmp/flowi", type="DirectoryOrCreate"))
@@ -27,15 +29,22 @@ volume_mounts = [k8s.V1VolumeMount(mount_path="/data", sub_path=None, name="data
 kubernetes_pod.KubernetesPodOperator(
     dag=dag,
     namespace="flowi",
-    image="localhost:32000/flowi-preprocessing:latest",
+    image="localhost:32000/flowi:latest",
     image_pull_policy="Always",
-    # cmds=["sh", "-c", "mkdir -p /airflow/xcom/;echo '[1,2,3,4]' > /airflow/xcom/return.json"],
-    name="preprocessing-dask",
-    env_vars=[k8s.V1EnvVar(name="RUN_ID", value="test123")],
+    cmds=["flowi", "{{ dag_run.conf['flow_chart'] }}"],
+    name="flowi-train",
+    env_vars=[
+        k8s.V1EnvVar(name="RUN_ID", value=flowi_run_id),
+        k8s.V1EnvVar(name="FLOW_NAME", value=flow_name),
+        k8s.V1EnvVar(name="VERSION", value="{{ dag_run.conf['version'] }}"),
+        k8s.V1EnvVar(name="EXPERIMENT_TRACKING", value="{{ dag_run.conf['experiment_tracking'] }}"),
+        k8s.V1EnvVar(name="MLFLOW_S3_ENDPOINT_URL", value="mlflow-service"),
+        k8s.V1EnvVar(name="MONGO_ENDPOINT_URL", value="mongo-service"),
+    ],
     volume_mounts=volume_mounts,
     volumes=volumes,
     is_delete_operator_pod=True,
     in_cluster=True,
-    task_id="preprocessing-dask-master",
+    task_id="flowi-train",
     get_logs=True,
 )
