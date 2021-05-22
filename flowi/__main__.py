@@ -5,19 +5,25 @@ Usage:
 """
 
 import argparse
+import ast
 import json
 
-from flowi.flow_chart.flow_chart import FlowChart
 from dask.distributed import Client
 
+from flowi.flow_chart.flow_chart import FlowChart
 from flowi.settings import DASK_SCHEDULER
 
 if __name__ == "__main__":
     train_parser = argparse.ArgumentParser(description="Training arguments")
 
-    train_parser.add_argument("--chart", type=json.loads, help="flow chart")
+    train_parser.add_argument("--chart", type=str, help="flow chart")
     args = train_parser.parse_args()
     flow_chart_json = args.chart
+    if isinstance(flow_chart_json, str):
+        try:
+            flow_chart_json = json.loads(flow_chart_json)
+        except json.decoder.JSONDecodeError:
+            flow_chart_json = ast.literal_eval(flow_chart_json)
 
     Client(address=DASK_SCHEDULER)
     flow_chart = FlowChart(flow_chart=flow_chart_json)

@@ -15,8 +15,25 @@ spec:
       labels:
         app: airflow
     spec:
+      serviceAccountName: airflow
       containers:
       - name: airflow
+        imagePullPolicy: Always
         image: localhost:32000/airflow
         ports:
         - containerPort: 8080
+        env:
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: http://minio-service
+        - name: BUCKET
+          value: mlflow
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: flowi-secrets
+              key: minio-access-key
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flowi-secrets
+              key: minio-secret-key

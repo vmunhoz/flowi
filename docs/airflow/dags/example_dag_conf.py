@@ -2,7 +2,8 @@ import json
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python_operator import PythonOperator
-from airflow.operators.docker_operator import DockerOperator
+
+# from airflow.operators.docker_operator import DockerOperator
 from datetime import datetime
 
 from flow_chart.validate_flow import ValidateFlow
@@ -46,15 +47,15 @@ def create_chart(dag):
     return ""
 
 
-train_task = DockerOperator(
-    task_id="train",
-    image="flowi-train",
-    api_version="auto",
-    auto_remove=True,
-    command="python main.py --chart '{}'".format(create_chart(dag)),
-    docker_url="unix://var/run/docker.sock",
-    network_mode="bridge",
-    dag=dag,
-)
-
-validate_chart_task >> train_task
+# train_task = DockerOperator(
+#     task_id="train",
+#     image="flowi-train",
+#     api_version="auto",
+#     auto_remove=True,
+#     command="python main.py --chart '{}'".format(create_chart(dag)),
+#     docker_url="unix://var/run/docker.sock",
+#     network_mode="bridge",
+#     dag=dag,
+# )
+#
+# validate_chart_task >> train_task

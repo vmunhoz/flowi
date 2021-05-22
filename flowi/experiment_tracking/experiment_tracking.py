@@ -1,13 +1,11 @@
 import os
 from typing import Any, List
 
-import mlflow
-
+import flowi.experiment_tracking
+from flowi import settings
 from flowi.experiment_tracking import Base
 from flowi.utilities.logger import Logger
 from flowi.utilities.singleton import Singleton
-import flowi.experiment_tracking
-from flowi import settings
 
 
 class ExperimentTracking(metaclass=Singleton):
