@@ -24,7 +24,7 @@ RUN apt-get update -y && \
 COPY ./scripts/* ${AIRFLOW_HOME}/
 
 RUN mkdir ${AIRFLOW_HOME}/dags/
-COPY dags/* ${AIRFLOW_HOME}/dags/
+COPY dags/ ${AIRFLOW_HOME}/dags/
 
 RUN chown -R airflow: ${AIRFLOW_HOME}
 

@@ -20,17 +20,36 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("FlowiTrainDask", default_args=default_args, catchup=False, schedule_interval=None)
-flowi_run_id = str(uuid.uuid4())
-flow_name = "Iris"
+flowi_configs_path = 'dags/flowi_configs/'
+dag = DAG("FlowiTrain{{FLOW_NAME}}", default_args=default_args, catchup=False, schedule_interval={{SCHEDULE_INTERVAL}})
+flow_name = "{{FLOW_NAME}}"
 
+with open(os.path.join(flowi_configs_path, 'flowi_config_{{FLOW_NAME}}.json'), 'r') as json_file:
+    flowi_config = json.load(json_file)
+
+version = flowi_config['version']
+experiment_tracking = flowi_config['experiment_tracking']
+flow_chart = flowi_config['flow_chart']
+
+
+def generate_uuid(**kwargs):
+    return str(uuid.uuid4())
+
+generate_uuid_task = PythonOperator(
+    task_id='generate_uuid',
+    python_callable=generate_uuid,
+    provide_context=True,
+    dag=dag)
 
 def validate_chart_func(ds, **kwargs):
-    chart = kwargs["dag_run"].conf["flow_chart"]
-    print("Remotely chart! {}".format(chart))
+    ti = kwargs['ti']
+    run_id = ti.xcom_pull(task_ids='generate_uuid')
+    print(run_id)
 
-    nodes = chart["nodes"]
-    links = chart["links"]
+    print("Remotely chart! {}".format(flow_chart))
+
+    nodes = flow_chart["nodes"]
+    links = flow_chart["links"]
 
     validate_flow = ValidateFlow(nodes=nodes)
     for link in links:
@@ -57,13 +76,13 @@ train_task = kubernetes_pod.KubernetesPodOperator(
     image="localhost:32000/flowi:latest",
     image_pull_policy="Always",
     cmds=["python"],
-    arguments=["-m", "flowi", "--chart", "{{ dag_run.conf['flow_chart'] }}"],
-    name="flowi-train",
+    arguments=["-m", "flowi", "--chart", json.dumps(flow_chart)],
+    name=f"flowi-train-{flow_name}",
     env_vars=[
-        k8s.V1EnvVar(name="RUN_ID", value=flowi_run_id),
+        k8s.V1EnvVar(name="RUN_ID", value='{{ ti.xcom_pull("generate_uuid") }}'),
         k8s.V1EnvVar(name="FLOW_NAME", value=flow_name),
-        k8s.V1EnvVar(name="VERSION", value="{{ dag_run.conf['version'] }}"),
-        k8s.V1EnvVar(name="EXPERIMENT_TRACKING", value="{{ dag_run.conf['experiment_tracking'] }}"),
+        k8s.V1EnvVar(name="VERSION", value=version),
+        k8s.V1EnvVar(name="EXPERIMENT_TRACKING", value=experiment_tracking),
         k8s.V1EnvVar(name="MLFLOW_S3_ENDPOINT_URL", value=os.environ["MLFLOW_S3_ENDPOINT_URL"]),
         k8s.V1EnvVar(name="FLOWI_BUCKET", value="flowi"),
         k8s.V1EnvVar(name="MONGO_ENDPOINT_URL", value="mongo-service"),
@@ -80,10 +99,11 @@ train_task = kubernetes_pod.KubernetesPodOperator(
 
 
 def compare_models_func(ds, **kwargs):
-    version = kwargs["dag_run"].conf["version"]
-    print("Comparing models from mongo. FlowName {} | Version {}".format(flow_name, version))
+    ti = kwargs['ti']
+    run_id = ti.xcom_pull(task_ids='generate_uuid')
+    print("Comparing models. Flow Name {} | RUN ID {} | Version {}".format(flow_name, run_id, version))
     mongo = Mongo()
-    models = mongo.get_models_by_version(flow_name=flow_name, version=version)
+    models = mongo.get_models_by_version(flow_name=flow_name, run_id=run_id, version=version)
     best_model = None
     best_performance = 0.0
     for model in models:
@@ -100,5 +120,6 @@ compare_models = PythonOperator(
 )
 
 
+validate_chart_task.set_upstream(generate_uuid_task)
 train_task.set_upstream(validate_chart_task)
 compare_models.set_upstream(train_task)
