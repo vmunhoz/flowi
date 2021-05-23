@@ -7,6 +7,8 @@ from airflow import DAG
 from airflow.providers.cncf.kubernetes.operators import kubernetes_pod
 from airflow.operators.python_operator import PythonOperator
 from kubernetes.client import models as k8s
+from validate_flow import ValidateFlow
+from mongo import Mongo
 
 default_args = {
     "owner": "leo",
@@ -19,16 +21,35 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("FlowiTrainDask", default_args=default_args, catchup=False, schedule_interval="@daily")
+dag = DAG("FlowiTrainDask", default_args=default_args, catchup=False, schedule_interval=None)
 flowi_run_id = str(uuid.uuid4())
 flow_name = "Iris"
 
 
-def run_this_func(ds, **kwargs):
-    print("Remotely received value of {}".format(json.dumps(kwargs["dag_run"].conf["flow_chart"])))
+def validate_chart_func(ds, **kwargs):
+    chart = kwargs["dag_run"].conf["flow_chart"]
+    print("Remotely chart! {}".format(chart))
+
+    nodes = chart["nodes"]
+    links = chart["links"]
+
+    validate_flow = ValidateFlow(nodes=nodes)
+    for link in links:
+        from_node = links[link]["from"]["nodeId"]
+        to_node = links[link]["to"]["nodeId"]
+        validate_flow.add_edge(from_node=from_node, to_node=to_node)
+
+    is_cyclic = validate_flow.is_cyclic()
+    if is_cyclic:
+        print("Graph is cyclic. Validation error.")
+        raise ValueError("Graph must be acyclic. There must be no cycles in the flow chart.")
+    else:
+        print("Validated graph as not cyclic")
 
 
-run_this = PythonOperator(task_id="run_this", provide_context=True, python_callable=run_this_func, dag=dag)
+validate_chart_task = PythonOperator(
+    dag=dag, task_id="validate_chart", provide_context=True, python_callable=validate_chart_func
+)
 
 
 train_task = kubernetes_pod.KubernetesPodOperator(
@@ -47,7 +68,7 @@ train_task = kubernetes_pod.KubernetesPodOperator(
         k8s.V1EnvVar(name="MLFLOW_S3_ENDPOINT_URL", value=os.environ["MLFLOW_S3_ENDPOINT_URL"]),
         k8s.V1EnvVar(name="FLOWI_BUCKET", value="flowi"),
         k8s.V1EnvVar(name="MONGO_ENDPOINT_URL", value="mongo-service"),
-        k8s.V1EnvVar(name="DASK_SCHEDULER", value="dask-scheduler"),
+        k8s.V1EnvVar(name="DASK_SCHEDULER", value="tcp://dask-scheduler:8786"),
         k8s.V1EnvVar(name="MLFLOW_TRACKING_URI", value="http://mlflow-service"),
         k8s.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=os.environ["AWS_ACCESS_KEY_ID"]),
         k8s.V1EnvVar(name="AWS_SECRET_ACCESS_KEY", value=os.environ["AWS_SECRET_ACCESS_KEY"]),
@@ -58,4 +79,27 @@ train_task = kubernetes_pod.KubernetesPodOperator(
     get_logs=True,
 )
 
-train_task.set_upstream(run_this)
+
+def compare_models_func(ds, **kwargs):
+    version = kwargs["dag_run"].conf["version"]
+    print("Comparing models from mongo. FlowName {} | Version {}".format(flow_name, version))
+    mongo = Mongo()
+    models = mongo.get_models_by_version(flow_name=flow_name, version=version)
+    best_model = None
+    best_performance = 0.0
+    for model in models:
+        model_performance = model["metrics"]["accuracy"]
+        if model_performance > best_performance:
+            best_performance = model_performance
+            best_model = model
+
+    print(best_model)
+
+
+compare_models = PythonOperator(
+    task_id="compare_models", provide_context=True, python_callable=compare_models_func, dag=dag
+)
+
+
+train_task.set_upstream(validate_chart_task)
+compare_models.set_upstream(train_task)

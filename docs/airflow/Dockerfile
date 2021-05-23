@@ -15,7 +15,8 @@ ARG AIRFLOW_VERSION=2.0.2
 RUN apt-get update -y && \
     apt-get install -y apt-utils libsasl2-dev
 
-RUN pip install apache-airflow['kubernetes'] apache-airflow-providers-cncf-kubernetes
+RUN pip install --no-cache-dir \
+    apache-airflow['kubernetes']==2.1.0 apache-airflow-providers-cncf-kubernetes==1.2.0 pymongo==3.11.4
 RUN apt-get update -y && \
     apt-get install expect -y
 
