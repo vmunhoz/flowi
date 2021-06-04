@@ -9,7 +9,7 @@ import re
 
 # Following are defaults which can be overridden later on
 default_args = {
-    "owner": "leo",
+    "owner": "flowi",
     "depends_on_past": False,
     "start_date": datetime(2020, 3, 21),
     "email": ["psilva.leo@gmail.com"],

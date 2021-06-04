@@ -22,6 +22,9 @@ spec:
         image: localhost:32000/airflow
         ports:
         - containerPort: 8080
+        volumeMounts:
+          - name: dockersock
+            mountPath: "/var/run/docker.sock"
         env:
         - name: MLFLOW_S3_ENDPOINT_URL
           value: http://minio-service
@@ -37,3 +40,7 @@ spec:
             secretKeyRef:
               name: flowi-secrets
               key: minio-secret-key
+      volumes:
+        - name: dockersock
+          hostPath:
+            path: /var/run/docker.sock

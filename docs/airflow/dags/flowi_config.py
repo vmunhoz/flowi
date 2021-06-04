@@ -24,23 +24,12 @@ flowi_configs_path = "dags/flowi_configs/"
 
 
 def create_config_file(ds, **kwargs):
-    flow_name = kwargs["dag_run"].conf["flow_name"]
-    flow_chart = kwargs["dag_run"].conf["flow_chart"]
-    version = kwargs["dag_run"].conf["version"]
-    experiment_tracking = kwargs["dag_run"].conf["experiment_tracking"]
     schedule_interval = kwargs["dag_run"].conf["schedule_interval"]
     schedule_interval = schedule_interval if schedule_interval == "None" else f"'{schedule_interval}'"
 
-    print(flow_name)
-    print(version)
-    print(experiment_tracking)
-
-    config = {
-        "flow_name": flow_name,
-        "version": version,
-        "experiment_tracking": experiment_tracking,
-        "flow_chart": flow_chart,
-    }
+    config = kwargs["dag_run"].conf
+    config["schedule_interval"] = schedule_interval
+    flow_name = config["flow_name"]
 
     with open(os.path.join(flowi_configs_path, f"flowi_config_{flow_name}.json"), "w") as json_file:
         json_file.write(json.dumps(config))

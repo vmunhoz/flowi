@@ -6,9 +6,11 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.providers.cncf.kubernetes.operators import kubernetes_pod
 from airflow.operators.python_operator import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from kubernetes.client import models as k8s
 from utils.validate_flow import ValidateFlow
 from utils.mongo import Mongo
+
 
 default_args = {
     "owner": "flowi",
@@ -23,6 +25,7 @@ default_args = {
 dag = DAG("FlowiTrainDask", default_args=default_args, catchup=False, schedule_interval=None)
 flowi_run_id = str(uuid.uuid4())
 flow_name = "Iris"
+deploy_api = True
 
 
 def validate_chart_func(ds, **kwargs):
@@ -102,3 +105,13 @@ compare_models = PythonOperator(
 
 train_task.set_upstream(validate_chart_task)
 compare_models.set_upstream(train_task)
+
+if deploy_api:
+    trigger_deploy_api_task = TriggerDagRunOperator(
+        dag=dag,
+        task_id="trigger_deploy_api_task",
+        trigger_dag_id="FlowiDeployAPI",  # Ensure this equals the dag_id of the DAG to trigger
+        conf={"flow_name": "iris-model"},
+    )
+
+    trigger_deploy_api_task.set_upstream(compare_models)

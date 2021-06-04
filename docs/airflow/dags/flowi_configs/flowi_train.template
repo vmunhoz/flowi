@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.providers.cncf.kubernetes.operators import kubernetes_pod
 from airflow.operators.python_operator import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from kubernetes.client import models as k8s
 from utils.validate_flow import ValidateFlow
 from utils.mongo import Mongo
@@ -30,16 +31,19 @@ with open(os.path.join(flowi_configs_path, 'flowi_config_{{FLOW_NAME}}.json'), '
 version = flowi_config['version']
 experiment_tracking = flowi_config['experiment_tracking']
 flow_chart = flowi_config['flow_chart']
+deploy_api = flowi_config['deploy']['api']
 
 
 def generate_uuid(**kwargs):
     return str(uuid.uuid4())
+
 
 generate_uuid_task = PythonOperator(
     task_id='generate_uuid',
     python_callable=generate_uuid,
     provide_context=True,
     dag=dag)
+
 
 def validate_chart_func(ds, **kwargs):
     ti = kwargs['ti']
@@ -123,3 +127,13 @@ compare_models = PythonOperator(
 validate_chart_task.set_upstream(generate_uuid_task)
 train_task.set_upstream(validate_chart_task)
 compare_models.set_upstream(train_task)
+
+if deploy_api:
+    trigger_deploy_api_task = TriggerDagRunOperator(
+        dag=dag,
+        task_id="trigger_deploy_api_task",
+        trigger_dag_id="FlowiDeployAPI",  # Ensure this equals the dag_id of the DAG to trigger
+        conf={"flow_name": f"{flow_name.lower()}"}
+    )
+
+    trigger_deploy_api_task.set_upstream(compare_models)
