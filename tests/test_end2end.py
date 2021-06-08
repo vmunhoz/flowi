@@ -1,12 +1,11 @@
+import json
 import os
 from unittest import mock
 
 import pymongo
-from dask.distributed import Client
 
 import flowi.settings
-from flowi.flow_chart.flow_chart import FlowChart
-from flowi.settings import DASK_SCHEDULER
+from flowi.__main__ import main
 
 FLOW_CHART = {
     "nodes": {
@@ -16,7 +15,7 @@ FLOW_CHART = {
             "properties": {
                 "name": "LoadFile",
                 "class": "LoadLocal",
-                "attributes": {"train_path": "tests/iris.csv", "test_path": "", "test_split": 0.2, "file_type": "csv"},
+                "attributes": {"train_path": "iris.csv", "test_path": "", "test_split": 0.2, "file_type": "csv"},
             },
         },
         "node-load-2": {
@@ -27,7 +26,7 @@ FLOW_CHART = {
                 "class": "LoadLocal",
                 "attributes": {
                     "output_df": "train_df",
-                    "train_path": "tests/iris.csv",
+                    "train_path": "iris.csv",
                     "test_path": "",
                     "test_split": 0.2,
                     "file_type": "csv",
@@ -74,7 +73,7 @@ FLOW_CHART = {
             "properties": {
                 "name": "SaveFile",
                 "class": "SaveLocal",
-                "attributes": {"path": "saved.csv", "file_type": "csv", "merge_policy": "none"},
+                "attributes": {"file_type": "csv", "file_name": "saved.csv", "label_column": "class"},
             },
         },
     },
@@ -92,13 +91,36 @@ FLOW_CHART = {
 }
 
 
-def test_end_to_end(mocker):
+def test_end_to_end_train(mocker):
     mocker.patch.object(flowi.settings, "FLOW_NAME", "End2End Test Flow")
     mocker.patch.object(flowi.settings, "EXPERIMENT_TRACKING", "MLflow")
-    Client(address=DASK_SCHEDULER)
     with mock.patch("flowi.flow_chart.node.Mongo") as mongo:
         mongo.assignment = {"_client": pymongo.MongoClient()}
+        main(["train", "--chart", json.dumps(FLOW_CHART)])
+    os.remove("saved.csv")
 
-        flow_chart = FlowChart(flow_chart=FLOW_CHART)
-        flow_chart.run()
-        os.remove("saved.csv")
+
+PREDICT_SOURCE = {
+    "id": "node-load-1",
+    "type": "Load",
+    "properties": {
+        "name": "LoadFile",
+        "class": "LoadLocal",
+        "attributes": {"train_path": "iris_pred.csv", "test_path": "", "test_split": 1.0, "file_type": "csv"},
+    },
+}
+
+PREDICT_DESTINY = {
+    "id": "node-save-1",
+    "type": "Save",
+    "properties": {
+        "name": "SaveFile",
+        "class": "SaveLocal",
+        "attributes": {"file_type": "csv", "file_name": "saved.csv", "label_column": "class"},
+    },
+}
+
+
+def test_end_to_end_predict():
+    main(["predict", "--source", json.dumps(PREDICT_SOURCE), "--destiny", json.dumps(PREDICT_DESTINY)])
+    os.remove("saved.csv")

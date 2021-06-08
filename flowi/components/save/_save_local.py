@@ -11,18 +11,27 @@ class SaveLocal(ComponentBase):
         self._logger = Logger(logger_name=__name__)
 
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
-        return dict()
+        return {"df": result}
 
-    def save_file(self, df: dd.DataFrame, path: str, file_type: str) -> str:
-        self._logger.debug("Loading files from directory: {}".format(path))
+    def save_file(
+        self, df: dd.DataFrame, file_name: str, file_type: str, label_column: str, save_label_column_only: bool = True
+    ) -> str:
+        self._logger.debug("Saving file to directory: {}".format(file_name))
+        if "flowi_label_class" in df.columns:
+            df = df.rename(columns={"flowi_label_class": label_column})
 
-        return self._save(file_type=file_type)(df, path)
+        if save_label_column_only:
+            self._save(file_type=file_type)(df[label_column], file_name)
+        else:
+            self._save(file_type=file_type)(df, file_name)
+
+        return df
 
     def _save(self, file_type: str):
         return getattr(self, "_save_" + file_type)
 
     @staticmethod
-    def _save_csv(df: dd.DataFrame, path: str) -> str:
-        df.to_csv(filename=path, single_file=True)
+    def _save_csv(df: dd.DataFrame, file_name: str) -> dd.DataFrame:
+        df.to_csv(filename=file_name, single_file=True)
 
-        return path
+        return df

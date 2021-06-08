@@ -12,7 +12,7 @@ def _unset_variable(variable_name: str):
         del os.environ[variable_name]
 
 
-FLOW_NAME = _get_env(variable_name="FLOW_NAME")
+FLOW_NAME = _get_env(variable_name="FLOW_NAME", default="unknown")
 VERSION = _get_env(variable_name="VERSION", default="not versioned")
 RUN_ID = _get_env(variable_name="RUN_ID", default=uuid.uuid4())
 EXPERIMENT_TRACKING = _get_env(variable_name="EXPERIMENT_TRACKING", default="MLflow")
