@@ -15,8 +15,9 @@ class Mongo(object):
     def insert(
         self, experiment_id: str, model_uri: str, input_transformer_uri: str, output_transformer_uri: str
     ) -> str:
+        flow_name = FLOW_NAME.lower()
         document = {
-            "flow_name": FLOW_NAME.lower(),
+            "flow_name": flow_name,
             "run_id": RUN_ID,
             "version": VERSION,
             "experiment_tracking": EXPERIMENT_TRACKING,
@@ -36,9 +37,10 @@ class Mongo(object):
         self._collection.update_one({"_id": ObjectId(mongo_id)}, [{"$set": {"staged": "true"}}])
 
     def get_models_by_version(self, flow_name: str, run_id: str, version: int or str):
+        flow_name = flow_name.lower()
         version = str(version)
         models = []
-        cursor = self._collection.find({"flow_name": flow_name.lower(), "run_id": run_id, "version": version})
+        cursor = self._collection.find({"flow_name": flow_name, "run_id": run_id, "version": version})
         for document in cursor:
             models.append(document)
         return models
@@ -48,6 +50,21 @@ class Mongo(object):
         for document in cursor:
             pprint(document)
 
+    def get_staged_model(self, flow_name: str, run_id: str):
+        flow_name = flow_name.lower()
+        staged_model = self._collection.find_one({"flow_name": flow_name, "run_id": run_id, "staged": "true"})
+        print(staged_model)
+        return staged_model
+
+    def get_deployed_model(self, flow_name: str):
+        flow_name = flow_name.lower()
+        deployed_model = self._collection.find_one({"flow_name": flow_name, "deployed": "true"})
+        print(deployed_model)
+        return deployed_model
+
 
 if __name__ == "__main__":
-    Mongo().show_all()
+    mongo = Mongo()
+    mongo.show_all()
+    mongo.get_staged_model(flow_name="mnist", run_id="fa02635a-97f3-44ac-99db-d642b4c98b09")
+    mongo.get_deployed_model(flow_name="mnist")

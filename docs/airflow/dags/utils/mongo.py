@@ -11,11 +11,13 @@ class Mongo(object):
         self._collection = _db.flowi_training
 
     def get_staged_model(self, flow_name: str, run_id: str):
+        flow_name = flow_name.lower()
         staged_model = self._collection.find_one({"flow_name": flow_name, "run_id": run_id, "staged": "true"})
         print(staged_model)
         return staged_model
 
     def get_deployed_model(self, flow_name: str):
+        flow_name = flow_name.lower()
         deployed_model = self._collection.find_one({"flow_name": flow_name, "deployed": "true"})
         print(deployed_model)
         return deployed_model

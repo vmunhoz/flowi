@@ -13,7 +13,6 @@ from kubernetes.client import models as k8s
 from utils.validate_flow import ValidateFlow
 from utils.mongo import Mongo
 
-
 default_args = {
     "owner": "flowi",
     "depends_on_past": False,
@@ -24,18 +23,18 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-flowi_configs_path = 'dags/flowi_configs/'
-dag = DAG("FlowiTrain{{FLOW_NAME}}", default_args=default_args, catchup=False, schedule_interval={{SCHEDULE_INTERVAL}})
-flow_name = "{{FLOW_NAME}}"
+flowi_configs_path = "dags/flowi_configs/"
+dag = DAG("FlowiTrainMNIST", default_args=default_args, catchup=False, schedule_interval=None)
+flow_name = "MNIST"
 
-with open(os.path.join(flowi_configs_path, 'flowi_config_{{FLOW_NAME}}.json'), 'r') as json_file:
+with open(os.path.join(flowi_configs_path, "flowi_config_MNIST.json"), "r") as json_file:
     flowi_config = json.load(json_file)
 
-version = flowi_config['version']
-experiment_tracking = flowi_config['experiment_tracking']
-flow_chart = flowi_config['flow_chart']
-deploy_api = flowi_config['deploy']['api']['enabled']
-deploy_batch = flowi_config['deploy']['batch']['enabled']
+version = flowi_config["version"]
+experiment_tracking = flowi_config["experiment_tracking"]
+flow_chart = flowi_config["flow_chart"]
+deploy_api = flowi_config["deploy"]["api"]["enabled"]
+deploy_batch = flowi_config["deploy"]["batch"]["enabled"]
 
 
 def generate_uuid(**kwargs):
@@ -43,15 +42,13 @@ def generate_uuid(**kwargs):
 
 
 generate_uuid_task = PythonOperator(
-    task_id='generate_uuid',
-    python_callable=generate_uuid,
-    provide_context=True,
-    dag=dag)
+    task_id="generate_uuid", python_callable=generate_uuid, provide_context=True, dag=dag
+)
 
 
 def validate_chart_func(ds, **kwargs):
-    ti = kwargs['ti']
-    run_id = ti.xcom_pull(task_ids='generate_uuid')
+    ti = kwargs["ti"]
+    run_id = ti.xcom_pull(task_ids="generate_uuid")
     print(run_id)
 
     print("Remotely chart! {}".format(flow_chart))
@@ -76,7 +73,6 @@ def validate_chart_func(ds, **kwargs):
 validate_chart_task = PythonOperator(
     dag=dag, task_id="validate_chart", provide_context=True, python_callable=validate_chart_func
 )
-
 
 train_task = kubernetes_pod.KubernetesPodOperator(
     dag=dag,
@@ -107,8 +103,8 @@ train_task = kubernetes_pod.KubernetesPodOperator(
 
 
 def compare_models_func(ds, **kwargs):
-    ti = kwargs['ti']
-    run_id = ti.xcom_pull(task_ids='generate_uuid')
+    ti = kwargs["ti"]
+    run_id = ti.xcom_pull(task_ids="generate_uuid")
     print("Comparing models. Flow Name {} | RUN ID {} | Version {}".format(flow_name, run_id, version))
 
     mongo = Mongo()
@@ -116,16 +112,16 @@ def compare_models_func(ds, **kwargs):
     print(deployed_model)
 
     if deployed_model is None:
-        print(f'There is no deployed model for {flow_name} yet. Setting to deploy.')
-        return 'update_deployed'
+        print(f"There is no deployed model for {flow_name} yet. Setting to deploy.")
+        return "update_deployed"
 
     staged_model = mongo.get_staged_model(flow_name=flow_name, run_id=run_id)
     print(staged_model)
 
-    if deployed_model['metrics']['accuracy'] < deployed_model['metrics']['accuracy']:
-        return 'update_deployed'
+    if deployed_model["metrics"]["accuracy"] < deployed_model["metrics"]["accuracy"]:
+        return "update_deployed"
 
-    return ''
+    return ""
 
 
 compare_models_task = BranchPythonOperator(
@@ -134,8 +130,8 @@ compare_models_task = BranchPythonOperator(
 
 
 def update_deployed(ds, **kwargs):
-    ti = kwargs['ti']
-    run_id = ti.xcom_pull(task_ids='generate_uuid')
+    ti = kwargs["ti"]
+    run_id = ti.xcom_pull(task_ids="generate_uuid")
     print(flow_name)
     print(run_id)
 
@@ -165,8 +161,8 @@ if deploy_api:
     trigger_deploy_api_task = TriggerDagRunOperator(
         dag=dag,
         task_id="trigger_deploy_api",
-        trigger_dag_id="FlowiDeployAPI",  # Ensure this equals the dag_id of the DAG to trigger
-        conf={"flow_name": f"{flow_name.lower()}", "run_id": '{{ ti.xcom_pull("generate_uuid") }}'}
+        trigger_dag_id="FlowiDeployAPI",
+        conf={"flow_name": f"{flow_name.lower()}", "run_id": '{{ ti.xcom_pull("generate_uuid") }}'},
     )
 
     trigger_deploy_api_task.set_upstream(update_deployed_task)
@@ -177,7 +173,11 @@ if deploy_batch:
         dag=dag,
         task_id="trigger_deploy_batch",
         trigger_dag_id="FlowiDeployBatch",
-        conf={"flow_name": f"{flow_name.lower()}", "run_id": '{{ ti.xcom_pull("generate_uuid") }}'}
+        conf={
+            "flow_name": f"{flow_name.lower()}",
+            "run_id": '{{ ti.xcom_pull("generate_uuid") }}',
+            "schedule_interval": flowi_config["deploy"]["batch"]["schedule_interval"],
+        },
     )
 
     trigger_deploy_batch_task.set_upstream(update_deployed_task)

@@ -53,7 +53,8 @@ COPY dags/ ${AIRFLOW_HOME}/dags/
 RUN chown -R airflow: ${AIRFLOW_HOME}
 
 RUN chmod 777 ${AIRFLOW_HOME} -R
-RUN chmod +x ${AIRFLOW_HOME}/dags/deploy/docker_build.sh
+RUN chmod +x ${AIRFLOW_HOME}/dags/deploy/docker_build_api.sh
+RUN chmod +x ${AIRFLOW_HOME}/dags/deploy/docker_build_batch.sh
 
 WORKDIR ${AIRFLOW_HOME}
 ENTRYPOINT ["./entrypoint.sh"]
