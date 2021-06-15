@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -15,4 +15,4 @@ metadata:
   namespace: flowi
 EOF
 
-kubectl describe secrets/flowi-secrets
+kubectl get secret flowi-secrets -o go-template='{{range $k,$v := .data}}{{"### "}}{{$k}}{{"\n"}}{{$v|base64decode}}{{"\n\n"}}{{end}}'

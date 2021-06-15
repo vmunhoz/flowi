@@ -1,7 +1,9 @@
-#/bin/bash
+#!/bin/bash
 
 
 # kubectl create namespace flowi
+helm repo add dask https://helm.dask.org/
+helm repo update
 helm install dask dask/dask --set serviceType=NodePort -n flowi
 helm upgrade --install dask dask/dask  --values values.yaml  -n flowi
 

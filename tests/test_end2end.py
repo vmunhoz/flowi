@@ -2,6 +2,7 @@ import json
 import os
 from unittest import mock
 
+import mongomock
 import pymongo
 
 import flowi.settings
@@ -94,9 +95,11 @@ FLOW_CHART = {
 def test_end_to_end_train(mocker):
     mocker.patch.object(flowi.settings, "FLOW_NAME", "End2End Test Flow")
     mocker.patch.object(flowi.settings, "EXPERIMENT_TRACKING", "MLflow")
-    with mock.patch("flowi.flow_chart.node.Mongo") as mongo:
-        mongo.assignment = {"_client": pymongo.MongoClient()}
-        main(["train", "--chart", json.dumps(FLOW_CHART)])
+    with mock.patch("flowi.flow_chart.node.Mongo") as node_mongo:
+        with mock.patch("flowi.flow_chart.flow_chart.Mongo") as flow_mongo:
+            node_mongo.assignment = {"_client": pymongo.MongoClient()}
+            flow_mongo.assignment = {"_client": pymongo.MongoClient()}
+            main(["train", "--chart", json.dumps(FLOW_CHART)])
     os.remove("saved.csv")
 
 
@@ -121,6 +124,10 @@ PREDICT_DESTINY = {
 }
 
 
-def test_end_to_end_predict():
-    main(["predict", "--source", json.dumps(PREDICT_SOURCE), "--destiny", json.dumps(PREDICT_DESTINY)])
+def test_end_to_end_predict(mocker):
+    mocker.patch.object(flowi.settings, "FLOW_NAME", "End2End Test Flow")
+    mocker.patch.object(flowi.settings, "EXPERIMENT_TRACKING", "MLflow")
+    with mock.patch("flowi.flow_chart.node.Mongo") as mongo:
+        mongo.assignment = {"_client": pymongo.MongoClient()}
+        main(["predict", "--source", json.dumps(PREDICT_SOURCE), "--destiny", json.dumps(PREDICT_DESTINY)])
     os.remove("saved.csv")

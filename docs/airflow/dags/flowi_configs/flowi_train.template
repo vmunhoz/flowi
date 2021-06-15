@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.providers.cncf.kubernetes.operators import kubernetes_pod
 from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import BranchPythonOperator
+from airflow.operators.bash import BashOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from kubernetes.client import models as k8s
 from utils.validate_flow import ValidateFlow
@@ -80,7 +82,7 @@ train_task = kubernetes_pod.KubernetesPodOperator(
     image="localhost:32000/flowi:latest",
     image_pull_policy="Always",
     cmds=["python"],
-    arguments=["-m", "flowi", "--chart", json.dumps(flow_chart)],
+    arguments=["-m", "flowi", "train", "--chart", json.dumps(flow_chart)],
     name=f"flowi-train-{flow_name}",
     env_vars=[
         k8s.V1EnvVar(name="RUN_ID", value='{{ ti.xcom_pull("generate_uuid") }}'),
@@ -106,20 +108,25 @@ def compare_models_func(ds, **kwargs):
     ti = kwargs['ti']
     run_id = ti.xcom_pull(task_ids='generate_uuid')
     print("Comparing models. Flow Name {} | RUN ID {} | Version {}".format(flow_name, run_id, version))
+
     mongo = Mongo()
-    models = mongo.get_models_by_version(flow_name=flow_name, run_id=run_id, version=version)
-    best_model = None
-    best_performance = 0.0
-    for model in models:
-        model_performance = model["metrics"]["accuracy"]
-        if model_performance > best_performance:
-            best_performance = model_performance
-            best_model = model
+    deployed_model = mongo.get_deployed_model(flow_name=flow_name)
+    print(deployed_model)
 
-    print(best_model)
+    if deployed_model is None:
+        print(f'There is no deployed model for {flow_name} yet. Setting to deploy.')
+        return 'trigger_deploy_api'
+
+    staged_model = mongo.get_staged_model(flow_name=flow_name, run_id=run_id)
+    print(staged_model)
+
+    if deployed_model['metrics']['accuracy'] < deployed_model['metrics']['accuracy']:
+        return 'trigger_deploy_api'
+
+    return 'not_deploy_api'
 
 
-compare_models = PythonOperator(
+compare_models = BranchPythonOperator(
     task_id="compare_models", provide_context=True, python_callable=compare_models_func, dag=dag
 )
 
@@ -131,9 +138,16 @@ compare_models.set_upstream(train_task)
 if deploy_api:
     trigger_deploy_api_task = TriggerDagRunOperator(
         dag=dag,
-        task_id="trigger_deploy_api_task",
+        task_id="trigger_deploy_api",
         trigger_dag_id="FlowiDeployAPI",  # Ensure this equals the dag_id of the DAG to trigger
-        conf={"flow_name": f"{flow_name.lower()}"}
+        conf={"flow_name": f"{flow_name.lower()}", "run_id": '{{ ti.xcom_pull("generate_uuid") }}'}
+    )
+
+    not_deploy_api_task = BashOperator(
+        task_id="not_deploy_api",
+        bash_command="echo 'Not deploying. Deployed version is better than the new one.'",
+        dag=dag
     )
 
     trigger_deploy_api_task.set_upstream(compare_models)
+    not_deploy_api_task.set_upstream(compare_models)

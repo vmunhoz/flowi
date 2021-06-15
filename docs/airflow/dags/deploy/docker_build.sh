@@ -1,6 +1,7 @@
 #!/bin/bash
 
 FLOW_NAME=$1
+RUN_ID=$2
 
 ## Model.py
 
@@ -100,7 +101,11 @@ CMD exec seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE
 ' > Dockerfile
 
 
+aws s3 cp "s3://models/staging/${RUN_ID}/model.pkl" "model.pkl" --endpoint-url http://minio-service
+aws s3 cp "s3://models/staging/${RUN_ID}/input_transformer.pkl" "input_transformer.pkl"
+aws s3 cp "s3://models/staging/${RUN_ID}/output_transformer.pkl" "output_transformer.pkl"
+
 
 docker build -t flowi-${FLOW_NAME} .
-docker tag flowi-${FLOW_NAME}:latest 10.152.183.6:5000/flowi-${FLOW_NAME}:latest
-docker push 10.152.183.6:5000/flowi-${FLOW_NAME}:latest
+docker tag flowi-${FLOW_NAME}:latest 10.152.183.130:5000/flowi-${FLOW_NAME}:latest
+docker push 10.152.183.130:5000/flowi-${FLOW_NAME}:latest

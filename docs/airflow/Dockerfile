@@ -40,7 +40,7 @@ RUN wget https://www.sqlite.org/src/tarball/sqlite.tar.gz && \
 ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
 RUN pip install --no-cache-dir \
-    apache-airflow['kubernetes']==2.1.0 apache-airflow-providers-cncf-kubernetes==1.2.0 pymongo==3.11.4 kubernetes
+    apache-airflow['kubernetes']==2.1.0 apache-airflow-providers-cncf-kubernetes==1.2.0 pymongo==3.11.4 kubernetes awscli
 RUN yum update -y && \
     yum install expect -y
 

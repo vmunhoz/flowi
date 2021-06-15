@@ -48,9 +48,17 @@ class ExperimentTracking(metaclass=Singleton):
         self._experiment_tracking.log_metric(experiment_id=self._current_experiment, key=metric_name, value=value)
 
     def save_transformer(self, obj: Any, file_path: str):
-        self._experiment_tracking.save_transformer(experiment_id=self._current_experiment, obj=obj, file_path=file_path)
+        return self._experiment_tracking.save_transformer(
+            experiment_id=self._current_experiment, obj=obj, file_path=file_path
+        )
 
     def save_model(self, obj: Any, file_path: str) -> str:
         return self._experiment_tracking.save_model(
             experiment_id=self._current_experiment, obj=obj, file_path=file_path
         )
+
+    def download_model(self, model_uri: str):
+        return self._experiment_tracking.download_model(model_uri=model_uri)
+
+    def download_transformer(self, transformer_uri: str):
+        return self._experiment_tracking.download_transformer(transformer_uri=transformer_uri)

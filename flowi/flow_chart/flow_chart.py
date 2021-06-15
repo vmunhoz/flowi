@@ -2,15 +2,19 @@ from typing import Iterable
 
 from sklearn.model_selection import ParameterGrid
 
+from flowi.connections.aws.s3 import S3
 from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.flow_chart.node import Node
 from flowi.flow_chart.topology import Topology
+from flowi.settings import FLOW_NAME, RUN_ID, VERSION
 from flowi.utilities.logger import Logger
+from flowi.utilities.mongo import Mongo
 
 
 class FlowChart(object):
     def __init__(self, flow_chart: dict):
         self._logger = Logger(logger_name=__name__)
+        self._mongo = Mongo()
         self._flow_chart = flow_chart
         self._experiment_tracking: ExperimentTracking = ExperimentTracking()
         self._runs_params = []
@@ -70,6 +74,37 @@ class FlowChart(object):
 
         self._runs_params = combined_params
 
+    def compare_models(self) -> dict:
+        self._logger.info("Comparing models. Flow Name {} | RUN ID {} | Version {}".format(FLOW_NAME, RUN_ID, VERSION))
+        models = self._mongo.get_models_by_version(flow_name=FLOW_NAME, run_id=RUN_ID, version=VERSION)
+        best_model = None
+        best_performance = 0.0
+        for model in models:
+            model_performance = model["metrics"]["accuracy"]
+            if model_performance > best_performance:
+                best_performance = model_performance
+                best_model = model
+
+        self._logger.info(best_model)
+
+        return best_model
+
+    def stage_model(self, model: dict):
+        s3 = S3()
+        run_id = model["run_id"]
+
+        # model
+        model_path = self._experiment_tracking.download_model(model_uri=model["model_uri"])
+        s3.upload_artifact(local_path=model_path, run_id=run_id)
+
+        input_transformer_path = self._experiment_tracking.download_model(model_uri=model["input_transformer_uri"])
+        s3.upload_artifact(local_path=input_transformer_path, run_id=run_id)
+
+        output_transformer_path = self._experiment_tracking.download_model(model_uri=model["output_transformer_uri"])
+        s3.upload_artifact(local_path=output_transformer_path, run_id=run_id)
+
+        self._mongo.stage_model(model["_id"])
+
     def run(self):
         for run_params in self._runs_params:
             global_variables = {}
@@ -83,3 +118,6 @@ class FlowChart(object):
                 node.run(global_variables=global_variables)
 
             self._experiment_tracking.end_experiments()
+
+        best_model = self.compare_models()
+        self.stage_model(model=best_model)

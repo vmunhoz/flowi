@@ -1,6 +1,7 @@
 import os
 
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 
 class Mongo(object):
@@ -9,10 +10,21 @@ class Mongo(object):
         _db = self._client["flowi"]
         self._collection = _db.flowi_training
 
-    def get_models_by_version(self, flow_name: str, run_id: str, version: int or str):
-        version = str(version)
-        models = []
-        cursor = self._collection.find({"flow_name": flow_name, "run_id": run_id, "version": version})
-        for document in cursor:
-            models.append(document)
-        return models
+    def get_staged_model(self, flow_name: str, run_id: str):
+        staged_model = self._collection.find_one({"flow_name": flow_name, "run_id": run_id, "staged": "true"})
+        print(staged_model)
+        return staged_model
+
+    def get_deployed_model(self, flow_name: str):
+        deployed_model = self._collection.find_one({"flow_name": flow_name, "deployed": "true"})
+        print(deployed_model)
+        return deployed_model
+
+    def deploy_model(self, mongo_id: str):
+        self._collection.update_one({"_id": ObjectId(mongo_id)}, [{"$set": {"deployed": "true"}}])
+
+    def undeploy_model(self, mongo_id: str):
+        self._collection.update_one({"_id": ObjectId(mongo_id)}, {"$unset": {"deployed": ""}})
+
+    def unstage_model(self, mongo_id: str):
+        self._collection.update_one({"_id": ObjectId(mongo_id)}, {"$unset": {"staged": ""}})

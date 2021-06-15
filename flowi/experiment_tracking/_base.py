@@ -29,6 +29,12 @@ class Base(object):
     def save_model(self, experiment_id: str, obj: Any, file_path: str):
         pass
 
+    def download_model(self, model_uri: str) -> str:
+        pass
+
+    def download_transformer(self, transformer_uri: str) -> str:
+        pass
+
     @staticmethod
     def _save_pickle(obj: Any, file_path: str) -> str:
         file_path = file_path if file_path.endswith(".pkl") else file_path + ".pkl"

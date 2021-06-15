@@ -66,3 +66,19 @@ class MLflow(Base):
         self._logger.debug(artifact_uri)
 
         return artifact_uri
+
+    def download_model(self, model_uri: str) -> str:
+        # 's3://mlflow/1/60aa90e454fe4ac09dd335573a50c0f9/artifacts/models/model.pkl'
+        return self._download_artifact(artifact_uri=model_uri)
+
+    def download_transformer(self, transformer_uri: str) -> str:
+        # 's3://mlflow/1/60aa90e454fe4ac09dd335573a50c0f9/artifacts/transformer/input_transformer.pkl'
+        return self._download_artifact(artifact_uri=transformer_uri)
+
+    def _download_artifact(self, artifact_uri: str) -> str:
+        # 's3://mlflow/1/60aa90e454fe4ac09dd335573a50c0f9/artifacts/transformer/input_transformer.pkl'
+        run_id = artifact_uri.split("/")[4]
+        path = "/".join(artifact_uri.split("/")[6:])
+        local_path = self._client.download_artifacts(run_id=run_id, path=path)
+
+        return local_path

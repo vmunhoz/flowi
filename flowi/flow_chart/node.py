@@ -51,6 +51,7 @@ class Node(object):
             "df": self._append_incoming_df(attribute_type="df"),
             "test_df": self._append_incoming_df(attribute_type="test_df"),
             "model": self._get_incoming_attribute("model"),
+            "model_uri": self._get_incoming_attribute("model_uri"),
             "parameters": self._get_incoming_attribute("parameters"),
             "y_pred": self._get_incoming_attribute("y_pred"),
             "y_true": self._get_incoming_attribute("y_true"),
@@ -134,7 +135,6 @@ class Node(object):
         if "model_selection" in class_name or (
             "model" in class_name and not self.state["has_model_selection_in_next_step"]
         ):
-            self.state["mongo_id"] = self._mongo.insert(experiment_id=self.state["experiment_id"])
 
             df = self.state["test_df"]
             y_true = df[self.state["target_column"]].values.compute()
@@ -145,8 +145,11 @@ class Node(object):
             input_transformer = create_transform_pipeline(
                 prediction_flow=self.prediction_flow, transform_type="transform_input"
             )
+            input_transformer_uri = ""
             if input_transformer is not None:
-                self._experiment_tracking.save_transformer(obj=input_transformer, file_path="input_transformer")
+                input_transformer_uri = self._experiment_tracking.save_transformer(
+                    obj=input_transformer, file_path="input_transformer"
+                )
                 X = input_transformer.transform(X=df)
 
             y_pred = self.state["model"].predict(X=X)
@@ -154,12 +157,22 @@ class Node(object):
             output_transformer = create_transform_pipeline(
                 prediction_flow=self.prediction_flow, transform_type="transform_output"
             )
+            output_transformer_uri = ""
             if output_transformer is not None:
-                self._experiment_tracking.save_transformer(obj=output_transformer, file_path="output_transformer")
+                output_transformer_uri = self._experiment_tracking.save_transformer(
+                    obj=output_transformer, file_path="output_transformer"
+                )
                 y_pred = output_transformer.inverse_transform(X=y_pred)
 
             self.state["y_pred"] = y_pred
             self.state["y_true"] = y_true
+
+            self.state["mongo_id"] = self._mongo.insert(
+                experiment_id=self.state["experiment_id"],
+                model_uri=self.state["model_uri"],
+                input_transformer_uri=input_transformer_uri,
+                output_transformer_uri=output_transformer_uri,
+            )
 
     def _pre_run(self):
         self.state = self._prepare_state()
@@ -183,4 +196,4 @@ class Node(object):
         self.predict_if_necessary()
         if self.type == "Metrics":
             value = self.state[f"metric_{self.method_name}"]
-            self._mongo.update(mongo_id=self.state["mongo_id"], metric_name=self.method_name, value=value)
+            self._mongo.add_metric(mongo_id=self.state["mongo_id"], metric_name=self.method_name, value=value)

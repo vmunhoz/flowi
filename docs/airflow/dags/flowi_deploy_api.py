@@ -10,6 +10,7 @@ from airflow.operators.bash import BashOperator
 from os import path
 import yaml
 from kubernetes import client, config
+from utils.mongo import Mongo
 
 # from kubernetes.client.exceptions import ApiException
 
@@ -29,7 +30,7 @@ dag = DAG("FlowiDeployAPI", default_args=default_args, catchup=False, schedule_i
 
 docker_build_task = BashOperator(
     task_id="docker_build",
-    bash_command="/usr/local/airflow/dags/deploy/docker_build.sh '{{ dag_run.conf[\"flow_name\"] }}' ",
+    bash_command="/usr/local/airflow/dags/deploy/docker_build.sh '{{ dag_run.conf[\"flow_name\"] }}' '{{ dag_run.conf[\"run_id\"] }}' ",
     dag=dag,
 )
 
@@ -93,4 +94,28 @@ deploy_api_model_task = PythonOperator(
     task_id="deploy_api_model_task", provide_context=True, python_callable=deploy_api_model, dag=dag
 )
 
+
+def update_deployed(ds, **kwargs):
+    run_id = kwargs["dag_run"].conf["run_id"]
+    flow_name = kwargs["dag_run"].conf["flow_name"]
+    print(flow_name)
+    print(run_id)
+
+    mongo = Mongo()
+    deployed_model = mongo.get_deployed_model(flow_name=flow_name)
+    print(deployed_model)
+    if deployed_model is not None:
+        mongo.undeploy_model(mongo_id=deployed_model["_id"])
+
+    staged_model = mongo.get_staged_model(flow_name=flow_name, run_id=run_id)
+    mongo.deploy_model(mongo_id=staged_model["_id"])
+    mongo.unstage_model(mongo_id=staged_model["_id"])
+
+
+update_deployed_task = PythonOperator(
+    task_id="update_deployed", provide_context=True, python_callable=update_deployed, dag=dag
+)
+
+
 deploy_api_model_task.set_upstream(docker_build_task)
+update_deployed_task.set_upstream(deploy_api_model_task)

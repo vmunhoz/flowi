@@ -18,13 +18,14 @@ class Classification(ComponentBase):
         model = result[0]
         parameters = result[1]
 
-        experiment_tracking.save_model(obj=model, file_path="model")
+        model_uri = experiment_tracking.save_model(obj=model, file_path="model")
         experiment_tracking.log_model_param(key=model.__class__.__name__, value=parameters)
         return {
             "model": model,
             "parameters": parameters,
             "target_column": methods_kwargs["target_column"],
             "object": model,
+            "model_uri": model_uri,
         }
 
     @staticmethod
