@@ -125,7 +125,7 @@ def compare_models_func(ds, **kwargs):
     if deployed_model['metrics']['accuracy'] < deployed_model['metrics']['accuracy']:
         return 'update_deployed'
 
-    return ''
+    return 'skip_update'
 
 
 compare_models_task = BranchPythonOperator(
@@ -154,11 +154,18 @@ update_deployed_task = PythonOperator(
     task_id="update_deployed", provide_context=True, python_callable=update_deployed, dag=dag
 )
 
+skip_update_task = BashOperator(
+    task_id='skip_update',
+     dag=dag,
+    bash_command='echo "Model deployed is better than new model. Skipping update."',
+)
+
 
 validate_chart_task.set_upstream(generate_uuid_task)
 train_task.set_upstream(validate_chart_task)
 compare_models_task.set_upstream(train_task)
 update_deployed_task.set_upstream(compare_models_task)
+skip_update_task.set_upstream(compare_models_task)
 
 
 if deploy_api:
@@ -177,7 +184,11 @@ if deploy_batch:
         dag=dag,
         task_id="trigger_deploy_batch",
         trigger_dag_id="FlowiDeployBatch",
-        conf={"flow_name": f"{flow_name}", "run_id": '{{ ti.xcom_pull("generate_uuid") }}'}
+        conf={
+            "flow_name": f"{flow_name}",
+            "run_id": '{{ ti.xcom_pull("generate_uuid") }}',
+            "schedule_interval": flowi_config["deploy"]["batch"]["schedule_interval"]
+        }
     )
 
     trigger_deploy_batch_task.set_upstream(update_deployed_task)

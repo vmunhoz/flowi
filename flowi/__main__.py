@@ -12,7 +12,7 @@ import sys
 from dask.distributed import Client
 
 from flowi.flow_chart.flow_chart import FlowChart
-from flowi.prediction import prediction_offline
+from flowi.prediction import prediction_batch
 from flowi.settings import DASK_SCHEDULER
 
 
@@ -36,7 +36,7 @@ def train(args):
 def predict(args):
     source = _json_load(args.source)
     destiny = _json_load(args.destiny)
-    prediction_offline.predict(source=source, destiny=destiny)
+    prediction_batch.predict(source=source, destiny=destiny)
 
 
 def main(args=None):

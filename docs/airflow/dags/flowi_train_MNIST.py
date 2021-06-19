@@ -121,8 +121,7 @@ def compare_models_func(ds, **kwargs):
     if deployed_model["metrics"]["accuracy"] < deployed_model["metrics"]["accuracy"]:
         return "update_deployed"
 
-    # return ""
-    return "update_deployed"
+    return "skip_update"
 
 
 compare_models_task = BranchPythonOperator(
@@ -152,10 +151,16 @@ update_deployed_task = PythonOperator(
 )
 
 
+skip_update_task = BashOperator(
+    task_id="skip_update", dag=dag, bash_command='echo "Model deployed is better than new model. Skipping update."'
+)
+
+
 validate_chart_task.set_upstream(generate_uuid_task)
 train_task.set_upstream(validate_chart_task)
 compare_models_task.set_upstream(train_task)
 update_deployed_task.set_upstream(compare_models_task)
+skip_update_task.set_upstream(compare_models_task)
 
 
 if deploy_api:

@@ -62,9 +62,14 @@ class Mongo(object):
         print(deployed_model)
         return deployed_model
 
+    def delete(self, flow_name: str):
+        flow_name = flow_name.lower()
+        self._collection.delete_many({"flow_name": flow_name})
+
 
 if __name__ == "__main__":
     mongo = Mongo()
     mongo.show_all()
     mongo.get_staged_model(flow_name="mnist", run_id="fa02635a-97f3-44ac-99db-d642b4c98b09")
     mongo.get_deployed_model(flow_name="mnist")
+    mongo.delete(flow_name="MNIST")
