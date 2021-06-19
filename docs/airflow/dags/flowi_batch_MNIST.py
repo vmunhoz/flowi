@@ -46,6 +46,10 @@ batch_task = kubernetes_pod.KubernetesPodOperator(
     env_vars=[
         k8s.V1EnvVar(name="FLOW_NAME", value=flow_name),
         k8s.V1EnvVar(name="DASK_SCHEDULER", value="tcp://dask-scheduler:8786"),
+        k8s.V1EnvVar(name="MLFLOW_S3_ENDPOINT_URL", value=os.environ["MLFLOW_S3_ENDPOINT_URL"]),
+        k8s.V1EnvVar(name="FLOWI_BUCKET", value="flowi"),
+        k8s.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=os.environ["AWS_ACCESS_KEY_ID"]),
+        k8s.V1EnvVar(name="AWS_SECRET_ACCESS_KEY", value=os.environ["AWS_SECRET_ACCESS_KEY"]),
     ],
     is_delete_operator_pod=True,
     in_cluster=True,

@@ -29,7 +29,6 @@ def _json_load(string: str) -> dict:
 def train(args):
     flow_chart_json = _json_load(args.chart)
 
-    Client(address=DASK_SCHEDULER)
     flow_chart = FlowChart(flow_chart=flow_chart_json)
     flow_chart.run()
 
@@ -55,6 +54,7 @@ def main(args=None):
     predict_parser.add_argument("--destiny", type=str, help="Where to dump predictions", required=True)
 
     args = flowi_parser.parse_args(args)
+    Client(address=DASK_SCHEDULER)
     if args.command == "train":
         train(args=args)
     elif args.command == "predict":

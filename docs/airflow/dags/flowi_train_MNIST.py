@@ -121,7 +121,8 @@ def compare_models_func(ds, **kwargs):
     if deployed_model["metrics"]["accuracy"] < deployed_model["metrics"]["accuracy"]:
         return "update_deployed"
 
-    return ""
+    # return ""
+    return "update_deployed"
 
 
 compare_models_task = BranchPythonOperator(
