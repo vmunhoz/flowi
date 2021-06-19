@@ -18,3 +18,15 @@ bump2version patch
 ``
 pre-commit run --all-files
 ``
+
+### Publish
+
+Building package
+``
+poetry build
+``
+
+Publishing version
+``
+poetry publish
+``
