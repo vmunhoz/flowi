@@ -1,17 +1,18 @@
 [tool.poetry]
 name = "flowi"
-version = "0.3.6"
+version = "0.3.7"
 description = ""
 authors = ["Leonardo Silva <psilva.leo@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-dask = "2021.4.0"
+dask = "2021.5.0"
+distributed = "2021.5.0"
+numpy = "1.20.3"
+dask-ml = "^1.8.0"
 pandas = "^1.2.4"
 cloudpickle = "^1.6.0"
-distributed = "^2021.4.0"
 scikit-learn = "^0.24.1"
-dask-ml = "^1.8.0"
 dill = "^0.3.3"
 mlflow = "^1.15.0"
 toml = "^0.10.2"
