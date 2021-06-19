@@ -177,7 +177,7 @@ if deploy_batch:
         dag=dag,
         task_id="trigger_deploy_batch",
         trigger_dag_id="FlowiDeployBatch",
-        conf={"flow_name": f"{flow_name.lower()}", "run_id": '{{ ti.xcom_pull("generate_uuid") }}'}
+        conf={"flow_name": f"{flow_name}", "run_id": '{{ ti.xcom_pull("generate_uuid") }}'}
     )
 
     trigger_deploy_batch_task.set_upstream(update_deployed_task)

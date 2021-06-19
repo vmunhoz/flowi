@@ -42,7 +42,7 @@ batch_task = kubernetes_pod.KubernetesPodOperator(
     image_pull_policy="Always",
     cmds=["python"],
     arguments=["-m", "flowi", "predict", "--source", json.dumps(source), "--destiny", json.dumps(destiny)],
-    name=f"flowi-batch-{flow_name}",
+    name=f"flowi-batch-{flow_name.lower()}",
     env_vars=[
         k8s.V1EnvVar(name="FLOW_NAME", value=flow_name),
         k8s.V1EnvVar(name="DASK_SCHEDULER", value="tcp://dask-scheduler:8786"),

@@ -31,7 +31,7 @@ flowi_configs_path = "dags/flowi_configs/"
 
 docker_build_task = BashOperator(
     task_id="docker_build",
-    bash_command="/usr/local/airflow/dags/deploy/docker_build_batch.sh '{{ dag_run.conf[\"flow_name\"] }}' '{{ dag_run.conf[\"run_id\"] }}' ",
+    bash_command="/usr/local/airflow/dags/deploy/docker_build_batch.sh '{{ dag_run.conf[\"flow_name\"].lower() }}' '{{ dag_run.conf[\"run_id\"] }}' ",
     dag=dag,
 )
 

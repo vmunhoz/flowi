@@ -175,7 +175,7 @@ if deploy_batch:
         task_id="trigger_deploy_batch",
         trigger_dag_id="FlowiDeployBatch",
         conf={
-            "flow_name": f"{flow_name.lower()}",
+            "flow_name": f"{flow_name}",
             "run_id": '{{ ti.xcom_pull("generate_uuid") }}',
             "schedule_interval": flowi_config["deploy"]["batch"]["schedule_interval"],
         },

@@ -196,7 +196,7 @@ toml = ["toml"]
 
 [[package]]
 name = "dask"
-version = "2021.4.1"
+version = "2021.4.0"
 description = "Parallel PyData with Task Scheduling"
 category = "main"
 optional = false
@@ -213,10 +213,10 @@ toolz = ">=0.8.2"
 
 [package.extras]
 array = ["numpy (>=1.16)"]
-complete = ["bokeh (>=1.0.0,!=2.0.0)", "distributed (>=2021.04.1)", "numpy (>=1.16)", "pandas (>=0.25.0)"]
+complete = ["bokeh (>=1.0.0,!=2.0.0)", "distributed (>=2021.03.0)", "numpy (>=1.16)", "pandas (>=0.25.0)"]
 dataframe = ["numpy (>=1.16)", "pandas (>=0.25.0)"]
 diagnostics = ["bokeh (>=1.0.0,!=2.0.0)"]
-distributed = ["distributed (>=2021.04.1)"]
+distributed = ["distributed (>=2021.03.0)"]
 test = ["pytest", "pytest-rerunfailures", "pytest-xdist"]
 
 [[package]]
@@ -1224,7 +1224,7 @@ heapdict = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "ca705e5cfe6ee70f5cb4da6fb27ecf41e8898a98be134b3f5ca2a7b76308bb6e"
+content-hash = "7ed097c8084818d7643842121fac252dff5e7f05947ade55ce76d0881c9f6a62"
 
 [metadata.files]
 aiobotocore = [
@@ -1383,8 +1383,8 @@ coverage = [
     {file = "coverage-5.5.tar.gz", hash = "sha256:ebe78fe9a0e874362175b02371bdfbee64d8edc42a044253ddf4ee7d3c15212c"},
 ]
 dask = [
-    {file = "dask-2021.4.1-py3-none-any.whl", hash = "sha256:344c342d699466c3f742019b7a33caf2472b751f38370b200ede7d2f354aa1e4"},
-    {file = "dask-2021.4.1.tar.gz", hash = "sha256:195e4eeb154222ea7a1c368119b5f321ee4ec9d78531471fe0145a527f744aa8"},
+    {file = "dask-2021.4.0-py3-none-any.whl", hash = "sha256:2370e4d7da35ee49e2211aef8ab63832455f25588149ca8b41d2c984c747e7cc"},
+    {file = "dask-2021.4.0.tar.gz", hash = "sha256:4f7e52ddedbffdf1cfd5525f4f901689e45f8769e059e7b7ecb332f8496f7f34"},
 ]
 dask-glm = [
     {file = "dask-glm-0.2.0.tar.gz", hash = "sha256:58b86cebf04fe5b9e58092e1c467e32e60d01e11b71fdc628baaa9fc6d1adee5"},
@@ -1490,7 +1490,6 @@ greenlet = [
     {file = "greenlet-1.1.0.tar.gz", hash = "sha256:c87df8ae3f01ffb4483c796fe1b15232ce2b219f0b18126948616224d3f658ee"},
 ]
 gunicorn = [
-    {file = "gunicorn-20.1.0-py3-none-any.whl", hash = "sha256:9dcc4547dbb1cb284accfb15ab5667a0e5d1881cc443e0677b4882a4067a807e"},
     {file = "gunicorn-20.1.0.tar.gz", hash = "sha256:e0a968b5ba15f8a328fdfd7ab1fcb5af4470c28aaf7e55df02a99bc13138e6e8"},
 ]
 heapdict = [
