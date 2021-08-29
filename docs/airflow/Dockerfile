@@ -49,6 +49,7 @@ COPY ./scripts/* ${AIRFLOW_HOME}/
 
 RUN mkdir ${AIRFLOW_HOME}/dags/
 COPY dags/ ${AIRFLOW_HOME}/dags/
+COPY airflow.cfg ${AIRFLOW_HOME}/
 
 RUN chown -R airflow: ${AIRFLOW_HOME}
 

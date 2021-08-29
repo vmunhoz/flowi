@@ -31,14 +31,18 @@ FLOW_CHART = {
         "node-fillna": {
             "id": "node-fillna",
             "type": "Preprocessing",
-            "properties": {"name": "Fillna", "class": "Preprocessing", "attributes": {"strategy": ["mean", "median"]}},
+            "properties": {
+                "name": "Fillna",
+                "class": "PreprocessingDataframe",
+                "attributes": {"strategy": ["mean", "median"]},
+            },
         },
         "node-standard-scaler": {
             "id": "node-standard-scaler",
             "type": "Preprocessing",
             "properties": {
                 "name": "StandardScaler",
-                "class": "Preprocessing",
+                "class": "PreprocessingDataframe",
                 "attributes": {
                     # "columns": [["sepal_length", "sepal_width", "petal_length", "petal_width"]],
                     "exclude_columns": [["class"]],

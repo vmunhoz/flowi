@@ -30,7 +30,7 @@ class Label(ComponentBase):
             "transform_output": transform_output,
         }
 
-    def label_encoder(self, df: dd.DataFrame, target_column: str, is_label: bool):
+    def label_encoder(self, df: dd.DataFrame, target_column: str):
         transformer = LabelEnc(target_column=target_column)
         transformer.fit(df)
         self._logger.debug(f"categories: {transformer.get_classes()}")
