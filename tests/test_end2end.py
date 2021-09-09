@@ -16,7 +16,7 @@ FLOW_CHART = {
             "properties": {
                 "name": "LoadFile",
                 "class": "LoadLocal",
-                "attributes": {"train_path": "iris.csv", "test_path": "", "test_split": 0.2, "file_type": "csv"},
+                "attributes": {"train_path": "tests/iris.csv", "test_path": "", "test_split": 0.2, "file_type": "csv"},
             },
         },
         "node-load-2": {
@@ -25,7 +25,7 @@ FLOW_CHART = {
             "properties": {
                 "name": "LoadFile",
                 "class": "LoadLocal",
-                "attributes": {"train_path": "iris.csv", "test_path": "", "test_split": 0.2, "file_type": "csv"},
+                "attributes": {"train_path": "tests/iris.csv", "test_path": "", "test_split": 0.2, "file_type": "csv"},
             },
         },
         "node-fillna": {
@@ -125,7 +125,7 @@ PREDICT_SOURCE = {
     "properties": {
         "name": "LoadFile",
         "class": "LoadLocal",
-        "attributes": {"train_path": "iris_pred.csv", "test_path": "", "test_split": 1.0, "file_type": "csv"},
+        "attributes": {"train_path": "tests/iris_pred.csv", "test_path": "", "test_split": 1.0, "file_type": "csv"},
     },
 }
 

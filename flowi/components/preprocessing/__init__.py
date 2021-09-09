@@ -2,7 +2,7 @@
 Preprocessing techniques for ml applications in datasets
 """
 
-from ._preprocessing import Preprocessing
+from ._preprocessing_dataframe import PreprocessingDataframe
 
 
-__all__ = ["Preprocessing"]
+__all__ = ["PreprocessingDataframe"]

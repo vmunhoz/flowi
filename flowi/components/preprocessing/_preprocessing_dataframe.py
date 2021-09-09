@@ -40,7 +40,7 @@ class ColumnFilter(BaseEstimator, TransformerMixin):
         return X
 
 
-class Preprocessing(ComponentBase):
+class PreprocessingDataframe(ComponentBase):
     def __init__(self):
         self._logger = Logger(logger_name=__name__)
 
