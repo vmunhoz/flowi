@@ -17,8 +17,8 @@ class Classification(ComponentBase):
         experiment_tracking.log_metric(metric_name=method_name, value=result)
         return {f"metric_{method_name}": result}
 
-    def accuracy(self, y_pred: np.array, y_true: np.array):
-        accuracy = accuracy_score(y_true=y_true, y_pred=y_pred)
+    def accuracy(self, y_pred: np.array, y_true: np.array, normalize: bool = True):
+        accuracy = accuracy_score(y_true=y_true, y_pred=y_pred, normalize=normalize)
         self._logger.debug(f"Accuracy: {accuracy}")
 
         return accuracy

@@ -39,8 +39,7 @@ class MLflow(Base):
     def log_metric(self, experiment_id: str, key: str, value: str or int or float):
         self._client.log_metric(run_id=experiment_id, key=key, value=value)
 
-    def save_transformer(self, experiment_id: str, obj: Any, file_path: str) -> str:
-        artifact_path = "transformers"
+    def _save_artefact(self, experiment_id: str, obj: Any, file_path: str, artifact_path: str) -> str:
         file_path = self._save_pickle(obj=obj, file_path=file_path)
 
         file_name = os.path.basename(file_path)
@@ -52,20 +51,24 @@ class MLflow(Base):
         self._logger.debug(artifact_uri)
 
         return artifact_uri
+
+    def save_transformer(self, experiment_id: str, obj: Any, file_path: str) -> str:
+        artifact_path = "transformers"
+        return self._save_artefact(
+            experiment_id=experiment_id, obj=obj, file_path=file_path, artifact_path=artifact_path
+        )
+
+    def save_drift(self, experiment_id: str, obj: Any, file_path: str) -> str:
+        artifact_path = "drift"
+        return self._save_artefact(
+            experiment_id=experiment_id, obj=obj, file_path=file_path, artifact_path=artifact_path
+        )
 
     def save_model(self, experiment_id: str, obj: Any, file_path: str) -> str:
         artifact_path = "models"
-        file_path = self._save_pickle(obj=obj, file_path=file_path)
-
-        file_name = os.path.basename(file_path)
-        self._client.log_artifact(run_id=experiment_id, local_path=file_path, artifact_path=artifact_path)
-
-        run = self._client.get_run(run_id=experiment_id)
-        artifact_uri = os.path.join(run.info.artifact_uri, artifact_path, file_name)
-
-        self._logger.debug(artifact_uri)
-
-        return artifact_uri
+        return self._save_artefact(
+            experiment_id=experiment_id, obj=obj, file_path=file_path, artifact_path=artifact_path
+        )
 
     def download_model(self, model_uri: str) -> str:
         # 's3://mlflow/1/60aa90e454fe4ac09dd335573a50c0f9/artifacts/models/model.pkl'

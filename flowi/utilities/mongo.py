@@ -26,12 +26,16 @@ class Mongo(object):
             "input_transformer_uri": input_transformer_uri,
             "output_transformer_uri": output_transformer_uri,
             "metrics": {},
+            "drift": "",
         }
         result = self._collection.insert_one(document)
         return result.inserted_id
 
     def add_metric(self, mongo_id: str, metric_name: str, value: float):
         self._collection.update_one({"_id": ObjectId(mongo_id)}, [{"$set": {"metrics": {str(metric_name): value}}}])
+
+    def add_drift(self, mongo_id: str, drift_name: str):
+        self._collection.update_one({"_id": ObjectId(mongo_id)}, [{"$set": {"drift": drift_name}}])
 
     def stage_model(self, mongo_id: str):
         self._collection.update_one({"_id": ObjectId(mongo_id)}, [{"$set": {"staged": "true"}}])
@@ -69,7 +73,8 @@ class Mongo(object):
 
 if __name__ == "__main__":
     mongo = Mongo()
+    mongo.add_drift(mongo_id="613d604afc490d9b0131f3f1", drift_name="kolmogorov_smirnov")
     mongo.show_all()
-    mongo.get_staged_model(flow_name="mnist", run_id="fa02635a-97f3-44ac-99db-d642b4c98b09")
-    mongo.get_deployed_model(flow_name="mnist")
-    mongo.delete(flow_name="MNIST")
+    # mongo.get_staged_model(flow_name="mnist", run_id="fa02635a-97f3-44ac-99db-d642b4c98b09")
+    # mongo.get_deployed_model(flow_name="mnist")
+    # mongo.delete(flow_name="MNIST")

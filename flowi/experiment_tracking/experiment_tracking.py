@@ -52,6 +52,11 @@ class ExperimentTracking(metaclass=Singleton):
             experiment_id=self._current_experiment, obj=obj, file_path=file_path
         )
 
+    def save_drift(self, obj: Any, file_path: str) -> str:
+        return self._experiment_tracking.save_drift(
+            experiment_id=self._current_experiment, obj=obj, file_path=file_path
+        )
+
     def save_model(self, obj: Any, file_path: str) -> str:
         return self._experiment_tracking.save_model(
             experiment_id=self._current_experiment, obj=obj, file_path=file_path

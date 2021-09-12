@@ -26,6 +26,9 @@ class Base(object):
     def save_transformer(self, experiment_id: str, obj: Any, file_path: str):
         pass
 
+    def save_drift(self, experiment_id: str, obj: Any, file_path: str):
+        pass
+
     def save_model(self, experiment_id: str, obj: Any, file_path: str):
         pass
 

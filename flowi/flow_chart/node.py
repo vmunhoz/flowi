@@ -1,11 +1,13 @@
 from __future__ import annotations
-from typing import Any, List
+
+from typing import List
 
 from flowi.components.component_base import ComponentBase
+from flowi.components.monitoring import Drift
 from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.prediction.prediction_flow import create_transform_pipeline
-from flowi.utilities.logger import Logger
 from flowi.utilities.imports import import_class
+from flowi.utilities.logger import Logger
 from flowi.utilities.mongo import Mongo
 from flowi.utilities.strings import convert_camel_to_snake
 
@@ -130,6 +132,14 @@ class Node(object):
             }
             self.prediction_flow.append(step)
 
+    def _drift_detection(self):
+        drift = Drift()
+        x_df = self.state["df"]
+        x_df = x_df.drop(columns=[self.state["target_column"]])
+
+        drift.apply(method_name="kolmogorov_smirnov", shared_variables={}, node_attributes={"df": x_df})
+        self._mongo.add_drift(mongo_id=self.state["mongo_id"], drift_name="kolmogorov_smirnov")
+
     def predict_if_necessary(self):
         class_name = self._get_class_name()
         if "model_selection" in class_name or (
@@ -173,6 +183,8 @@ class Node(object):
                 input_transformer_uri=input_transformer_uri,
                 output_transformer_uri=output_transformer_uri,
             )
+
+            self._drift_detection()
 
     def _pre_run(self):
         self.state = self._prepare_state()

@@ -28,13 +28,25 @@ FLOW_CHART = {
                 "attributes": {"train_path": "tests/iris.csv", "test_path": "", "test_split": 0.2, "file_type": "csv"},
             },
         },
+        "node-label-enc": {
+            "id": "node-label-enc",
+            "type": "Label",
+            "properties": {
+                "name": "LabelEncoder",
+                "class": "Label",
+                "attributes": {"target_column": "class", "is_label": True},
+            },
+        },
         "node-fillna": {
             "id": "node-fillna",
             "type": "Preprocessing",
             "properties": {
                 "name": "Fillna",
                 "class": "PreprocessingDataframe",
-                "attributes": {"strategy": ["mean", "median"]},
+                "attributes": {
+                    # "columns": [["sepal_length", "sepal_width", "petal_length", "petal_width"]],
+                    "strategy": ["mean", "median"]
+                },
             },
         },
         "node-standard-scaler": {
@@ -49,15 +61,6 @@ FLOW_CHART = {
                     "with_mean": True,
                     "with_std": True,
                 },
-            },
-        },
-        "node-label-enc": {
-            "id": "node-label-enc",
-            "type": "Label",
-            "properties": {
-                "name": "LabelEncoder",
-                "class": "Label",
-                "attributes": {"target_column": "class", "is_label": True},
             },
         },
         "node-model-svc": {
