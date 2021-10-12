@@ -143,10 +143,10 @@ PREDICT_DESTINY = {
 }
 
 
-def test_end_to_end_predict(mocker):
-    mocker.patch.object(flowi.settings, "FLOW_NAME", "End2End Test Flow")
-    mocker.patch.object(flowi.settings, "EXPERIMENT_TRACKING", "MLflow")
-    # with mock.patch("flowi.flow_chart.node.Mongo") as mongo:
-    #     mongo.assignment = {"_client": pymongo.MongoClient()}
-    main(["predict", "--source", json.dumps(PREDICT_SOURCE), "--destiny", json.dumps(PREDICT_DESTINY)])
-    os.remove("saved.csv")
+# def test_end_to_end_predict(mocker):
+#     mocker.patch.object(flowi.settings, "FLOW_NAME", "End2End Test Flow")
+#     mocker.patch.object(flowi.settings, "EXPERIMENT_TRACKING", "MLflow")
+#     # with mock.patch("flowi.flow_chart.node.Mongo") as mongo:
+#     #     mongo.assignment = {"_client": pymongo.MongoClient()}
+#     main(["predict", "--source", json.dumps(PREDICT_SOURCE), "--destiny", json.dumps(PREDICT_DESTINY)])
+#     os.remove("saved.csv")

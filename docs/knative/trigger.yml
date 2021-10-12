@@ -1,0 +1,15 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: drift-trigger
+  namespace: flowi
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: io.seldon.serving.inference.request
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: drift-detector

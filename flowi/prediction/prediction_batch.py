@@ -28,6 +28,23 @@ def predict(source: dict, destiny: dict, result_only: bool = True):
         _logger.info("Transforming input")
         X = input_transformer.transform(X)
 
+    # drift detection
+    drift_detector = _load("drift_detector.pkl")
+
+    n_samples = 400
+    length = len(X)
+    fraction = min(n_samples / length, 1)
+    x = X.sample(frac=fraction)
+    x = x.values.compute()
+
+    preds = drift_detector.predict(x)
+    is_drift = preds["data"]["is_drift"]
+
+    if is_drift:
+        _logger.info("Drift Detected!")
+        _logger.info("Finished Batch without predicting")
+        return -1
+
     _logger.info("Predicting")
     model = _load("model.pkl")
     y_pred = model.predict(X)
