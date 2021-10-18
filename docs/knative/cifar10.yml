@@ -26,7 +26,7 @@ spec:
       endpoint:
         service_port: 8501
       logger:
-        url: http://default-broker-ingress.flowi.svc.cluster.local
+        url: http://broker-ingress.knative-eventing.svc.cluster.local/seldon/default
         mode: all
     name: model
     replicas: 1

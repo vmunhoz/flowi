@@ -137,8 +137,11 @@ class Node(object):
         x_df = self.state["df"]
         x_df = x_df.drop(columns=[self.state["target_column"]])
 
-        drift.apply(method_name="kolmogorov_smirnov", shared_variables={}, node_attributes={"df": x_df})
-        self._mongo.add_drift(mongo_id=self.state["mongo_id"], drift_name="kolmogorov_smirnov")
+        drift_detector_uri = drift.apply(
+            method_name="kolmogorov_smirnov", shared_variables={}, node_attributes={"df": x_df}
+        )
+        return drift_detector_uri
+        # self._mongo.add_drift(mongo_id=self.state["mongo_id"], drift_name="kolmogorov_smirnov")
 
     def predict_if_necessary(self):
         class_name = self._get_class_name()
@@ -177,14 +180,15 @@ class Node(object):
             self.state["y_pred"] = y_pred
             self.state["y_true"] = y_true
 
+            drift_detector_uri = self._drift_detection()
+
             self.state["mongo_id"] = self._mongo.insert(
                 experiment_id=self.state["experiment_id"],
                 model_uri=self.state["model_uri"],
+                drift_detector_uri=drift_detector_uri,
                 input_transformer_uri=input_transformer_uri,
                 output_transformer_uri=output_transformer_uri,
             )
-
-            self._drift_detection()
 
     def _pre_run(self):
         self.state = self._prepare_state()

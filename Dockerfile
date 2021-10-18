@@ -12,3 +12,5 @@ RUN poetry config virtualenvs.create false && \
     rm -rf ~/.cache/pypoetry/{cache,artifacts}
 
 COPY flowi/ ./flowi/
+
+RUN mkdir -p /airflow/xcom/

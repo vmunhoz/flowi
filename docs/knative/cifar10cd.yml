@@ -29,4 +29,4 @@ spec:
         - io.seldon.serving.cifar10cd
         - DriftDetector
         - --drift_batch_size
-        - '100'
+        - '500'

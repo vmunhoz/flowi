@@ -17,8 +17,8 @@ class Drift(ComponentBase):
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
         experiment_tracking = ExperimentTracking()
 
-        experiment_tracking.save_drift(obj=result, file_path=method_name)
-        return {"df": methods_kwargs["df"], "object": result}
+        drift_detector_uri = experiment_tracking.save_drift(obj=result, file_path="drift_detector")
+        return {"df": methods_kwargs["df"], "object": result, "drift_detector_uri": drift_detector_uri}
 
     @staticmethod
     def _handle_df(df: dd.DataFrame):

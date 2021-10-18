@@ -35,40 +35,15 @@ docker_build_task = BashOperator(
 )
 
 
-def deploy_api_model(ds, **kwargs):
+def deploy_seldon(flow_name: str, group: str, plural: str, version: str, yaml_content: str):
     config.load_incluster_config()
-    flow_name = kwargs["dag_run"].conf["flow_name"]
-    group = "machinelearning.seldon.io"
-    version = "v1"
-    plural = "seldondeployments"
+    # flow_name = kwargs["dag_run"].conf["flow_name"]
+    # group = "machinelearning.seldon.io"
+    # version = "v1"
+    # plural = "seldondeployments"
     namespace = "seldon"
 
-    deployment = f"""
-apiVersion: machinelearning.seldon.io/v1
-kind: SeldonDeployment
-metadata:
-  name: {flow_name}
-  namespace: seldon
-spec:
-  name: {flow_name}
-  predictors:
-  - componentSpecs:
-    - spec:
-        containers:
-        - name: classifier
-          image: localhost:32000/flowi-{flow_name}
-    graph:
-      children: []
-      endpoint:
-        type: REST
-      name: classifier
-      type: MODEL
-    name: {flow_name}
-    replicas: 1
-    """
-    # with open(path.join(path.dirname(__file__), "seldon-deployment.yml")) as f:
-    #     body = yaml.safe_load(f)
-    body = yaml.safe_load(deployment)
+    body = yaml.safe_load(yaml_content)
 
     api = client.CustomObjectsApi()
     try:
@@ -90,9 +65,136 @@ spec:
         print(resource)
 
 
+def deploy_api_model(ds, **kwargs):
+    group = "machinelearning.seldon.io"
+    plural = "seldondeployments"
+    flow_name = kwargs["dag_run"].conf["flow_name"]
+    version = "v1"
+
+    yaml_content = f"""
+    apiVersion: machinelearning.seldon.io/v1
+    kind: SeldonDeployment
+    metadata:
+      name: {flow_name}
+      namespace: seldon
+    spec:
+      name: {flow_name}
+      predictors:
+      - componentSpecs:
+        - spec:
+            containers:
+            - name: classifier
+              image: localhost:32000/flowi-{flow_name}
+        graph:
+          children: []
+          endpoint:
+            type: REST
+          name: classifier
+          type: MODEL
+          logger:
+            url: http://broker-ingress.knative-eventing.svc.cluster.local/seldon/default
+            mode: all
+        name: {flow_name}
+        replicas: 1
+        """
+
+    deploy_seldon(flow_name=flow_name, group=group, plural=plural, version=version, yaml_content=yaml_content)
+
+
 deploy_api_model_task = PythonOperator(
     task_id="deploy_api_model", provide_context=True, python_callable=deploy_api_model, dag=dag
 )
 
 
-deploy_api_model_task.set_upstream(docker_build_task)
+def deploy_drift_detector(ds, **kwargs):
+    group = "eventing.knative.dev"
+    plural = "services"
+    flow_name = kwargs["dag_run"].conf["flow_name"]
+    version = "v1"
+    run_id = kwargs["dag_run"].conf["run_id"]
+
+    yaml_content = f"""
+    apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: drift-detector-{flow_name}
+  namespace: seldon
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+    spec:
+      containers:
+      - image: seldonio/alibi-detect-server:1.5.0
+        env:
+          - name: MLFLOW_S3_ENDPOINT_URL
+            value: {os.environ["MLFLOW_S3_ENDPOINT_URL"]}
+          - name: AWS_ACCESS_KEY_ID
+            value: {os.environ["AWS_ACCESS_KEY_ID"]}
+          - name: AWS_SECRET_ACCESS_KEY
+            value: {os.environ["AWS_SECRET_ACCESS_KEY"]}
+        imagePullPolicy: IfNotPresent
+        args:
+        - --model_name
+        - {flow_name}dd
+        - --http_port
+        - '8080'
+        - --protocol
+        - tensorflow.http
+        - --storage_uri
+        - s3://models/staging/{run_id}/drift_detector.pkl
+        - --reply_url
+        - http://message-dumper.seldon
+        - --event_type
+        - io.seldon.serving.inference.drift
+        - --event_source
+        - io.seldon.serving.{flow_name}dd
+        - DriftDetector
+        - --drift_batch_size
+        - '500'
+    """
+
+    deploy_seldon(flow_name=flow_name, group=group, plural=plural, version=version, yaml_content=yaml_content)
+
+
+deploy_drift_detector_task = PythonOperator(
+    task_id="deploy_drift_detector", provide_context=True, python_callable=deploy_drift_detector, dag=dag
+)
+
+
+def deploy_drift_trigger(ds, **kwargs):
+    group = "eventing.knative.dev"
+    plural = "triggers"
+    flow_name = kwargs["dag_run"].conf["flow_name"]
+    version = "v1"
+
+    yaml_content = f"""
+    apiVersion: eventing.knative.dev/v1
+    kind: Trigger
+    metadata:
+      name: drift-trigger-{flow_name}
+      namespace: seldon
+    spec:
+      broker: default
+      filter:
+        attributes:
+          type: io.seldon.serving.inference.request
+      subscriber:
+        ref:
+          apiVersion: serving.knative.dev/v1
+          kind: Service
+          name: drift-detector-{flow_name}
+    """
+
+    deploy_seldon(flow_name=flow_name, group=group, plural=plural, version=version, yaml_content=yaml_content)
+
+
+deploy_drift_trigger_task = PythonOperator(
+    task_id="deploy_drift_trigger", provide_context=True, python_callable=deploy_drift_trigger, dag=dag
+)
+
+
+docker_build_task.set_downstream(deploy_api_model_task)
+deploy_api_model_task.set_downstream(deploy_drift_detector_task)
+deploy_drift_detector_task.set_downstream(deploy_drift_trigger_task)

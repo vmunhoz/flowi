@@ -13,7 +13,12 @@ class Mongo(object):
         self._collection = _db.flowi_training
 
     def insert(
-        self, experiment_id: str, model_uri: str, input_transformer_uri: str, output_transformer_uri: str
+        self,
+        experiment_id: str,
+        model_uri: str,
+        drift_detector_uri: str,
+        input_transformer_uri: str,
+        output_transformer_uri: str,
     ) -> str:
         flow_name = FLOW_NAME.lower()
         document = {
@@ -23,6 +28,7 @@ class Mongo(object):
             "experiment_tracking": EXPERIMENT_TRACKING,
             "experiment_id": experiment_id,
             "model_uri": model_uri,
+            "drift_detector_uri": drift_detector_uri,
             "input_transformer_uri": input_transformer_uri,
             "output_transformer_uri": output_transformer_uri,
             "metrics": {},

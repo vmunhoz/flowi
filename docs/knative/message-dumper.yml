@@ -2,7 +2,7 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: message-dumper
-  namespace: flowi
+  namespace: seldon
 spec:
   template:
     metadata:

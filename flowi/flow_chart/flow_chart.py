@@ -97,6 +97,9 @@ class FlowChart(object):
         model_path = self._experiment_tracking.download_model(model_uri=model["model_uri"])
         s3.upload_artifact(local_path=model_path, run_id=run_id)
 
+        drift_detector_path = self._experiment_tracking.download_model(model_uri=model["drift_detector_uri"])
+        s3.upload_artifact(local_path=drift_detector_path, run_id=run_id)
+
         input_transformer_path = self._experiment_tracking.download_model(model_uri=model["input_transformer_uri"])
         s3.upload_artifact(local_path=input_transformer_path, run_id=run_id)
 

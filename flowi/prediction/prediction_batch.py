@@ -4,6 +4,7 @@ import dill
 import dask.dataframe as dd
 
 from flowi.utilities.logger import Logger
+from flowi.utilities.airflow_xcom import write_xcom
 
 _logger = Logger(logger_name=__name__)
 
@@ -43,6 +44,7 @@ def predict(source: dict, destiny: dict, result_only: bool = True):
     if is_drift:
         _logger.info("Drift Detected!")
         _logger.info("Finished Batch without predicting")
+        write_xcom(key="drift", value="1")
         return -1
 
     _logger.info("Predicting")

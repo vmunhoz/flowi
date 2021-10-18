@@ -18,6 +18,7 @@ COPY . /app
 
 
 aws s3 cp "s3://models/staging/${RUN_ID}/model.pkl" "model.pkl" --endpoint-url http://minio-service
+aws s3 cp "s3://models/staging/${RUN_ID}/drift_detector.pkl" "drift_detector.pkl" --endpoint-url http://minio-service
 aws s3 cp "s3://models/staging/${RUN_ID}/input_transformer.pkl" "input_transformer.pkl"  --endpoint-url http://minio-service
 aws s3 cp "s3://models/staging/${RUN_ID}/output_transformer.pkl" "output_transformer.pkl"  --endpoint-url http://minio-service
 

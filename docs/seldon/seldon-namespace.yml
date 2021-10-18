@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: seldon
   labels:
-    istio-injection: enabled
+    istio-injection: disabled

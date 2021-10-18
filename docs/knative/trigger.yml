@@ -2,7 +2,7 @@ apiVersion: eventing.knative.dev/v1
 kind: Trigger
 metadata:
   name: drift-trigger
-  namespace: flowi
+  namespace: seldon
 spec:
   broker: default
   filter:
