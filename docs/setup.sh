@@ -19,41 +19,53 @@ source ./setup_seldon.sh
 
 
 ## Installing Dask ##
+cd dask
 kubectl config set-context --current --namespace=$FLOWI_NAMESPACE
 #cd dask || (echo "directory dask does not exist"; exit)
-source ./dask/install_dask.sh
+source install_dask.sh
 #helm repo add dask https://helm.dask.org/
 #helm repo update
 #helm install my-dask dask/dask
 
 
 ## Minio ##
+cd ../minio
 #kubectl apply -f minio/minio-pv.yml
 #kubectl apply -f minio/minio-service.yml
 #kubectl apply -f minio/minio-deployment.yml
-source ./minio/setup_minio.sh
+source setup_minio.sh
 
 ## Mongo ##
-kubectl apply -f ./mongodb/mongo-deployment.yml
-kubectl apply -f ./mongodb/mongo-service.yml
+cd ../mongodb
+#kubectl apply -f ./mongodb/mongo-deployment.yml
+#kubectl apply -f ./mongodb/mongo-service.yml
+source setup_mongodb.sh
 
 
 ## Mysql ##
-kubectl apply -f ./mysql/mysql-pv.yml
-kubectl apply -f ./mysql/mysql-service.yml
-kubectl apply -f ./mysql/mysql-deployment.yml
+cd ../mysql
+#kubectl apply -f ./mysql/mysql-pv.yml
+#kubectl apply -f ./mysql/mysql-service.yml
+#kubectl apply -f ./mysql/mysql-deployment.yml
+source setup_mysql.sh
 
 ## Mlflow ##
-kubectl apply -f ./mlflow/mlflow-deployment.yml
-kubectl apply -f ./mlflow/mlflow-service.yml
+cd ../mlflow
+#kubectl apply -f ./mlflow/mlflow-deployment.yml
+#kubectl apply -f ./mlflow/mlflow-service.yml
+source setup_mlflow.sh
 
 
 
 ## Flowi UI ##
-kubectl apply -f ./flowi-ui/flowi-ui-deployment.yml
-kubectl apply -f ./flowi-ui/flowi-ui-service.yml
+cd ../flowi-ui
+#kubectl apply -f ./flowi-ui/flowi-ui-deployment.yml
+#kubectl apply -f ./flowi-ui/flowi-ui-service.yml
+source setup_flowi-ui.sh
 
 ## Airflow ##
-kubectl apply -f ./airflow/airflow-rbac.yml
-kubectl apply -f ./airflow/airflow-deployment.yml
-kubectl apply -f ./airflow/airflow-service.yml
+cd ../airflow
+#kubectl apply -f ./airflow/airflow-rbac.yml
+#kubectl apply -f ./airflow/airflow-deployment.yml
+#kubectl apply -f ./airflow/airflow-service.yml
+source setup_airflow.sh
