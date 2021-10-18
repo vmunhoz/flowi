@@ -75,14 +75,16 @@ task_branch = BranchPythonOperator(
 )
 
 task_drifted = BashOperator(
-        bash_command="echo Drifted!",
-        task_id="task_drifted",
-    )
+    bash_command="echo Drifted!",
+    task_id="task_drifted",
+    dag=dag
+)
 
 task_not_drifted = BashOperator(
-        bash_command="echo Not Drifted!",
-        task_id="task_not_drifted",
-    )
+    bash_command="echo Not Drifted!",
+    task_id="task_not_drifted",
+    dag=dag
+)
 
 
 # batch_task >> task_branch

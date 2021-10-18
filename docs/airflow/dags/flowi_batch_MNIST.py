@@ -72,11 +72,16 @@ task_branch = BranchPythonOperator(
     task_id="task_branch", python_callable=get_branch_follow, provide_context=True, dag=dag
 )
 
-task_drifted = BashOperator(bash_command="echo Drifted!", task_id="task_drifted")
+task_drifted = BashOperator(bash_command="echo Drifted!", task_id="task_drifted", dag=dag)
 
-task_not_drifted = BashOperator(bash_command="echo Not Drifted!", task_id="task_not_drifted")
+task_not_drifted = BashOperator(bash_command="echo Not Drifted!", task_id="task_not_drifted", dag=dag)
 
 
-batch_task >> task_branch
-task_branch >> task_drifted
-task_branch >> task_not_drifted
+# batch_task >> task_branch
+batch_task.set_downstream(task_branch)
+
+# task_branch >> task_drifted
+task_branch.set_downstream(task_drifted)
+
+# task_branch >> task_not_drifted
+task_branch.set_downstream(task_not_drifted)
