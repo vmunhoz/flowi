@@ -157,7 +157,7 @@ def deploy_drift_detector(ds, **kwargs):
             - '500'
     """
 
-    deploy_seldon(name=flow_name, group=group, plural=plural, version=version, yaml_content=yaml_content)
+    deploy_seldon(name=name, group=group, plural=plural, version=version, yaml_content=yaml_content)
 
 
 deploy_drift_detector_task = PythonOperator(
@@ -190,7 +190,7 @@ def deploy_drift_trigger(ds, **kwargs):
           name: drift-detector-{flow_name}
     """
 
-    deploy_seldon(name=flow_name, group=group, plural=plural, version=version, yaml_content=yaml_content)
+    deploy_seldon(name=name, group=group, plural=plural, version=version, yaml_content=yaml_content)
 
 
 deploy_drift_trigger_task = PythonOperator(

@@ -31,14 +31,15 @@ class Model(object):
 
     def __init__(self):
         print("Initializing")
-        self._model = self._load("model.asd")
-        self._input_transformer = self._load("input_transformer.asd")
-        self._output_transformer = self._load("output_transformer.asd")
+        self._model = self._load("model.pkl")
+        self._input_transformer = self._load("input_transformer.pkl")
+        self._output_transformer = self._load("output_transformer.pkl")
 
     @staticmethod
     def _load(file_path: str):
         if os.path.isfile(file_path):
-            return dill.load(file_path)
+            with open(file_path, "rb") as f:
+                return dill.load(f)
         else:
             return DummyTransformer()
 
