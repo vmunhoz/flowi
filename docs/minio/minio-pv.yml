@@ -18,6 +18,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: minio-pv-claim
+  namespace: flowi
 spec:
   storageClassName: manual
   accessModes:

@@ -8,5 +8,10 @@ spec:
     app: minio
   ports:
     - protocol: TCP
+      name: api
       port: 80
       targetPort: 9000
+    - protocol: TCP
+      name: console
+      port: 9001
+      targetPort: 9001

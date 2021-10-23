@@ -18,18 +18,18 @@ spec:
       - image: minio/minio
         name: minio
         command: [ "minio", "server" ]
-        args: [ "./data" ]
+        args: [ "/data" , "--console-address", ":9001" ]
         env:
-        - name: MINIO_ACCESS_KEY
+        - name: MINIO_ROOT_USER
           valueFrom:
             secretKeyRef:
               name: flowi-secrets
-              key: minio-access-key
-        - name: MINIO_SECRET_KEY
+              key: minio-admin-access-key
+        - name: MINIO_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
               name: flowi-secrets
-              key: minio-secret-key
+              key: minio-admin-secret-key
         ports:
         - containerPort: 9000
           name: minio
