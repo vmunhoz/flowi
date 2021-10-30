@@ -146,7 +146,7 @@ def deploy_drift_detector(ds, **kwargs):
             - --protocol
             - tensorflow.http
             - --storage_uri
-            - s3://models/staging/{run_id}/drift_detector.pkl
+            - s3://models/staging/{run_id}
             - --reply_url
             - http://message-dumper.seldon
             - --event_type

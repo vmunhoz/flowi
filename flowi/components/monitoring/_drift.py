@@ -1,13 +1,14 @@
+import shutil
 from typing import Any
 
-import numpy as np
 import dask.dataframe as dd
+import numpy as np
+from alibi_detect.cd import KSDrift
+from alibi_detect.utils.saving import save_detector
 
 from flowi.components.component_base import ComponentBase
 from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.utilities.logger import Logger
-
-from alibi_detect.cd import KSDrift
 
 
 class Drift(ComponentBase):
@@ -17,7 +18,11 @@ class Drift(ComponentBase):
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
         experiment_tracking = ExperimentTracking()
 
-        drift_detector_uri = experiment_tracking.save_drift(obj=result, file_path="drift_detector")
+        file_path = "tmp_drift"
+        save_detector(result, file_path)
+        drift_detector_uri = experiment_tracking.save_drift(file_path=file_path)
+        shutil.rmtree(file_path)
+
         return {"df": methods_kwargs["df"], "object": result, "drift_detector_uri": drift_detector_uri}
 
     @staticmethod

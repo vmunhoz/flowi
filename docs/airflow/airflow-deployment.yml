@@ -27,7 +27,7 @@ spec:
             mountPath: "/var/run/docker.sock"
         env:
         - name: MLFLOW_S3_ENDPOINT_URL
-          value: http://minio-service
+          value: http://minio-service.flowi.svc.cluster.local
         - name: BUCKET
           value: mlflow
         - name: AWS_ACCESS_KEY_ID

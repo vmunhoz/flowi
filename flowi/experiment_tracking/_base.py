@@ -29,7 +29,7 @@ class Base(object):
     def save_columns(self, experiment_id: str, obj: Any, file_path: str):
         pass
 
-    def save_drift(self, experiment_id: str, obj: Any, file_path: str):
+    def save_drift(self, experiment_id: str, file_path: str):
         pass
 
     def save_model(self, experiment_id: str, obj: Any, file_path: str):

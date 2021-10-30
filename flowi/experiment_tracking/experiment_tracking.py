@@ -57,10 +57,20 @@ class ExperimentTracking(metaclass=Singleton):
             experiment_id=self._current_experiment, obj=obj, file_path=file_path
         )
 
-    def save_drift(self, obj: Any, file_path: str) -> str:
-        return self._experiment_tracking.save_drift(
-            experiment_id=self._current_experiment, obj=obj, file_path=file_path
-        )
+    def save_drift(self, file_path: str) -> list:
+        # from alibi_detect.utils.saving import save_detector
+        # save_detector(obj, 'tmp_drift')
+        # KSDrift.dill
+        # meta.dill
+        files = os.listdir(file_path)
+        drift_detector_uris = []
+        for file in files:
+            uri = self._experiment_tracking.save_drift(
+                experiment_id=self._current_experiment, file_path=os.path.join(file_path, file)
+            )
+            drift_detector_uris.append(uri)
+
+        return drift_detector_uris
 
     def save_model(self, obj: Any, file_path: str) -> str:
         return self._experiment_tracking.save_model(
