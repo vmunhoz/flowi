@@ -75,7 +75,7 @@ class Model(object):
 
 ## requirements.txt
 
-echo 'flowi==0.3.11
+echo 'flowi==0.3.12
 seldon-core==1.11.2
 ' > requirements.txt
 
