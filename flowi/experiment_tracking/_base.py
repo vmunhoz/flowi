@@ -26,16 +26,16 @@ class Base(object):
     def save_transformer(self, experiment_id: str, obj: Any, file_path: str):
         pass
 
+    def save_columns(self, experiment_id: str, obj: Any, file_path: str):
+        pass
+
     def save_drift(self, experiment_id: str, obj: Any, file_path: str):
         pass
 
     def save_model(self, experiment_id: str, obj: Any, file_path: str):
         pass
 
-    def download_model(self, model_uri: str) -> str:
-        pass
-
-    def download_transformer(self, transformer_uri: str) -> str:
+    def download_artifact(self, artifact_uri: str) -> str:
         pass
 
     @staticmethod

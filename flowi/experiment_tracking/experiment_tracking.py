@@ -52,6 +52,11 @@ class ExperimentTracking(metaclass=Singleton):
             experiment_id=self._current_experiment, obj=obj, file_path=file_path
         )
 
+    def save_columns(self, obj: Any, file_path: str):
+        return self._experiment_tracking.save_columns(
+            experiment_id=self._current_experiment, obj=obj, file_path=file_path
+        )
+
     def save_drift(self, obj: Any, file_path: str) -> str:
         return self._experiment_tracking.save_drift(
             experiment_id=self._current_experiment, obj=obj, file_path=file_path
@@ -62,8 +67,5 @@ class ExperimentTracking(metaclass=Singleton):
             experiment_id=self._current_experiment, obj=obj, file_path=file_path
         )
 
-    def download_model(self, model_uri: str):
-        return self._experiment_tracking.download_model(model_uri=model_uri)
-
-    def download_transformer(self, transformer_uri: str):
-        return self._experiment_tracking.download_transformer(transformer_uri=transformer_uri)
+    def download_artifact(self, artifact_uri: str):
+        return self._experiment_tracking.download_artifact(artifact_uri=artifact_uri)

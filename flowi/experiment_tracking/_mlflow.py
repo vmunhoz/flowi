@@ -58,6 +58,12 @@ class MLflow(Base):
             experiment_id=experiment_id, obj=obj, file_path=file_path, artifact_path=artifact_path
         )
 
+    def save_columns(self, experiment_id: str, obj: Any, file_path: str) -> str:
+        artifact_path = "columns"
+        return self._save_artefact(
+            experiment_id=experiment_id, obj=obj, file_path=file_path, artifact_path=artifact_path
+        )
+
     def save_drift(self, experiment_id: str, obj: Any, file_path: str) -> str:
         artifact_path = "drift"
         return self._save_artefact(
@@ -70,18 +76,19 @@ class MLflow(Base):
             experiment_id=experiment_id, obj=obj, file_path=file_path, artifact_path=artifact_path
         )
 
-    def download_model(self, model_uri: str) -> str:
-        # 's3://mlflow/1/60aa90e454fe4ac09dd335573a50c0f9/artifacts/models/model.pkl'
-        return self._download_artifact(artifact_uri=model_uri)
+    # def download_model(self, model_uri: str) -> str:
+    #     # 's3://mlflow/1/60aa90e454fe4ac09dd335573a50c0f9/artifacts/models/model.pkl'
+    #     return self._download_artifact(artifact_uri=model_uri)
+    #
+    # def download_transformer(self, transformer_uri: str) -> str:
+    #     # 's3://mlflow/1/60aa90e454fe4ac09dd335573a50c0f9/artifacts/transformer/input_transformer.pkl'
+    #     return self._download_artifact(artifact_uri=transformer_uri)
 
-    def download_transformer(self, transformer_uri: str) -> str:
+    def download_artifact(self, artifact_uri: str) -> str:
         # 's3://mlflow/1/60aa90e454fe4ac09dd335573a50c0f9/artifacts/transformer/input_transformer.pkl'
-        return self._download_artifact(artifact_uri=transformer_uri)
-
-    def _download_artifact(self, artifact_uri: str) -> str:
-        # 's3://mlflow/1/60aa90e454fe4ac09dd335573a50c0f9/artifacts/transformer/input_transformer.pkl'
-        run_id = artifact_uri.split("/")[4]
-        path = "/".join(artifact_uri.split("/")[6:])
+        # 'file:///home/leo/flowi/mlruns/1/93f1eb92c95f4317ae1c1e3cd39f429a/artifacts/models/model.pkl'
+        run_id = artifact_uri.split("/")[-4]
+        path = "/".join(artifact_uri.split("/")[-2:])
         local_path = self._client.download_artifacts(run_id=run_id, path=path)
 
         return local_path

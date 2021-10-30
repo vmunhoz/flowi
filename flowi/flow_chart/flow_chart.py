@@ -94,16 +94,23 @@ class FlowChart(object):
         run_id = model["run_id"]
 
         # model
-        model_path = self._experiment_tracking.download_model(model_uri=model["model_uri"])
+        model_path = self._experiment_tracking.download_artifact(artifact_uri=model["model_uri"])
         s3.upload_artifact(local_path=model_path, run_id=run_id)
 
-        drift_detector_path = self._experiment_tracking.download_model(model_uri=model["drift_detector_uri"])
+        columns_path = self._experiment_tracking.download_artifact(artifact_uri=model["columns_uri"])
+        s3.upload_artifact(local_path=columns_path, run_id=run_id)
+
+        drift_detector_path = self._experiment_tracking.download_artifact(artifact_uri=model["drift_detector_uri"])
         s3.upload_artifact(local_path=drift_detector_path, run_id=run_id)
 
-        input_transformer_path = self._experiment_tracking.download_model(model_uri=model["input_transformer_uri"])
+        input_transformer_path = self._experiment_tracking.download_artifact(
+            artifact_uri=model["input_transformer_uri"]
+        )
         s3.upload_artifact(local_path=input_transformer_path, run_id=run_id)
 
-        output_transformer_path = self._experiment_tracking.download_model(model_uri=model["output_transformer_uri"])
+        output_transformer_path = self._experiment_tracking.download_artifact(
+            artifact_uri=model["output_transformer_uri"]
+        )
         s3.upload_artifact(local_path=output_transformer_path, run_id=run_id)
 
         self._mongo.stage_model(model["_id"])

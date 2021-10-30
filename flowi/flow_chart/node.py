@@ -151,6 +151,8 @@ class Node(object):
             y_true = df[self.state["target_column"]].values.compute()
 
             df = df.drop(columns=[self.state["target_column"]])
+            columns = df.columns.tolist()
+            columns_uri = self._experiment_tracking.save_columns(obj=columns, file_path="columns")
             X = df
 
             input_transformer = create_transform_pipeline(
@@ -183,6 +185,7 @@ class Node(object):
             self.state["mongo_id"] = self._mongo.insert(
                 experiment_id=self.state["experiment_id"],
                 model_uri=self.state["model_uri"],
+                columns_uri=columns_uri,
                 drift_detector_uri=drift_detector_uri,
                 input_transformer_uri=input_transformer_uri,
                 output_transformer_uri=output_transformer_uri,
