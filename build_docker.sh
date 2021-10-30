@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # flowi
-docker buiild -t flowi .
+docker build -t flowi .
 docker tag flowi:latest localhost:32000/flowi:latest
 docker push localhost:32000/flowi:latest
 

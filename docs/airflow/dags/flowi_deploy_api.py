@@ -86,6 +86,7 @@ def deploy_api_model(ds, **kwargs):
             containers:
             - name: classifier
               image: localhost:32000/flowi-{flow_name}
+              imagePullPolicy: Always
         graph:
           children: []
           endpoint:
@@ -130,7 +131,7 @@ def deploy_drift_detector(ds, **kwargs):
           containers:
           - image: seldonio/alibi-detect-server:1.5.0
             env:
-              - name: MLFLOW_S3_ENDPOINT_URL
+              - name: CONFIG_S3_ENDPOINT
                 value: {os.environ["MLFLOW_S3_ENDPOINT_URL"]}
               - name: AWS_ACCESS_KEY_ID
                 value: {os.environ["AWS_ACCESS_KEY_ID"]}
