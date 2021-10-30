@@ -105,5 +105,5 @@ aws s3 cp "s3://models/staging/${RUN_ID}/output_transformer.pkl" "output_transfo
 
 
 docker build -t flowi-${FLOW_NAME} .
-docker tag flowi-${FLOW_NAME}:latest 10.152.183.130:5000/flowi-${FLOW_NAME}:latest
-docker push 10.152.183.130:5000/flowi-${FLOW_NAME}:latest
+docker tag flowi-${FLOW_NAME}:latest 10.152.183.203:5000/flowi-${FLOW_NAME}:latest
+docker push 10.152.183.203:5000/flowi-${FLOW_NAME}:latest
