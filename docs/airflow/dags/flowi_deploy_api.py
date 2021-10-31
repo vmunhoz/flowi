@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import uuid
 from datetime import datetime, timedelta
 from pprint import pprint
@@ -46,17 +47,26 @@ def deploy_seldon(name: str, group: str, plural: str, version: str, yaml_content
         )
         print("Deployment already exists")
 
-        resource = api.patch_namespaced_custom_object(
-            group=group, version=version, plural=plural, namespace=namespace, name=name, body=body
-        )
-        print("Resource updated details:")
-        pprint(resource)
+        if "drift" in name:
+            resource = api.delete_namespaced_custom_object(
+                group=group, version=version, plural=plural, namespace=namespace, name=name
+            )
+            print("Deleting deployment")
+            # print(resource)
+            time.sleep(5)
 
-        # resource = api.delete_namespaced_custom_object(
-        #     group=group, version=version, plural=plural, namespace=namespace, name=name
-        # )
-        # print("Deleting deployment")
-        # print(resource)
+            resource = api.create_namespaced_custom_object(
+                group=group, version=version, plural=plural, namespace=namespace, body=body
+            )
+            print("Creating deployment")
+            print(resource)
+        else:
+            resource = api.patch_namespaced_custom_object(
+                group=group, version=version, plural=plural, namespace=namespace, name=name, body=body
+            )
+            print("Resource updated details:")
+            pprint(resource)
+
     except Exception:
         resource = api.create_namespaced_custom_object(
             group=group, version=version, plural=plural, namespace=namespace, body=body
@@ -129,13 +139,19 @@ def deploy_drift_detector(ds, **kwargs):
             autoscaling.knative.dev/minScale: "1"
         spec:
           containers:
-          - image: seldonio/alibi-detect-server:1.5.0
+          - image: seldonio/alibi-detect-server:1.11.2
             env:
-              - name: AWS_ENDPOINT_URL
-                value: {os.environ["MLFLOW_S3_ENDPOINT_URL"]}
-              - name: AWS_ACCESS_KEY_ID
+              - name: RCLONE_CONFIG_S3_TYPE
+                value: s3
+              - name: RCLONE_CONFIG_S3_PROVIDER
+                value: minio
+              - name: RCLONE_CONFIG_S3_ENV_AUTH
+                value: "false"
+              - name: RCLONE_CONFIG_S3_ENDPOINT
+                value: http://{os.environ["MLFLOW_S3_ENDPOINT_URL"]}
+              - name: RCLONE_CONFIG_S3_ACCESS_KEY_ID
                 value: {os.environ["AWS_ACCESS_KEY_ID"]}
-              - name: AWS_SECRET_ACCESS_KEY
+              - name: RCLONE_CONFIG_S3_SECRET_ACCESS_KEY
                 value: {os.environ["AWS_SECRET_ACCESS_KEY"]}
             imagePullPolicy: IfNotPresent
             args:

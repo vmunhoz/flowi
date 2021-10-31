@@ -13,7 +13,7 @@ ARG AIRFLOW_VERSION=2.0.2
 
 # Install
 RUN yum update -y && \
-    yum install wget tar gzip gcc make expect docker -y
+    yum install wget tar gzip gcc make expect docker nano -y
 
 RUN wget https://www.sqlite.org/src/tarball/sqlite.tar.gz && \
     tar xzf sqlite.tar.gz && \
