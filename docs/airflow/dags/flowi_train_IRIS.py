@@ -1,0 +1,189 @@
+import json
+import os
+import uuid
+from datetime import datetime, timedelta
+
+from airflow import DAG
+from airflow.providers.cncf.kubernetes.operators import kubernetes_pod
+from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import BranchPythonOperator
+from airflow.operators.bash import BashOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from kubernetes.client import models as k8s
+from utils.validate_flow import ValidateFlow
+from utils.mongo import Mongo
+
+default_args = {
+    "owner": "flowi",
+    "depends_on_past": False,
+    "start_date": datetime(2020, 3, 21),
+    "email_on_failure": False,
+    "email_on_retry": False,
+    "retries": 1,
+    "retry_delay": timedelta(minutes=1),
+}
+
+flowi_configs_path = "dags/flowi_configs/"
+dag = DAG("FlowiTrainIRIS", default_args=default_args, catchup=False, schedule_interval=None)
+flow_name = "IRIS"
+
+with open(os.path.join(flowi_configs_path, "flowi_config_IRIS.json"), "r") as json_file:
+    flowi_config = json.load(json_file)
+
+version = flowi_config["version"]
+experiment_tracking = flowi_config["experiment_tracking"]
+flow_chart = flowi_config["flow_chart"]
+deploy_api = flowi_config["deploy"]["api"]["enabled"]
+deploy_batch = flowi_config["deploy"]["batch"]["enabled"]
+
+
+def generate_uuid(**kwargs):
+    return str(uuid.uuid4())
+
+
+generate_uuid_task = PythonOperator(
+    task_id="generate_uuid", python_callable=generate_uuid, provide_context=True, dag=dag
+)
+
+
+def validate_chart_func(ds, **kwargs):
+    ti = kwargs["ti"]
+    run_id = ti.xcom_pull(task_ids="generate_uuid")
+    print(run_id)
+
+    print("Remotely chart! {}".format(flow_chart))
+
+    nodes = flow_chart["nodes"]
+    links = flow_chart["links"]
+
+    validate_flow = ValidateFlow(nodes=nodes)
+    for link in links:
+        from_node = links[link]["from"]["nodeId"]
+        to_node = links[link]["to"]["nodeId"]
+        validate_flow.add_edge(from_node=from_node, to_node=to_node)
+
+    is_cyclic = validate_flow.is_cyclic()
+    if is_cyclic:
+        print("Graph is cyclic. Validation error.")
+        raise ValueError("Graph must be acyclic. There must be no cycles in the flow chart.")
+    else:
+        print("Validated graph as not cyclic")
+
+
+validate_chart_task = PythonOperator(
+    dag=dag, task_id="validate_chart", provide_context=True, python_callable=validate_chart_func
+)
+
+train_task = kubernetes_pod.KubernetesPodOperator(
+    dag=dag,
+    namespace="flowi",
+    image="localhost:32000/flowi:latest",
+    image_pull_policy="Always",
+    cmds=["python"],
+    arguments=["-m", "flowi", "train", "--chart", json.dumps(flow_chart)],
+    name=f"flowi-train-{flow_name}",
+    env_vars=[
+        k8s.V1EnvVar(name="RUN_ID", value='{{ ti.xcom_pull("generate_uuid") }}'),
+        k8s.V1EnvVar(name="FLOW_NAME", value=flow_name),
+        k8s.V1EnvVar(name="VERSION", value=version),
+        k8s.V1EnvVar(name="EXPERIMENT_TRACKING", value=experiment_tracking),
+        k8s.V1EnvVar(name="MLFLOW_S3_ENDPOINT_URL", value=os.environ["MLFLOW_S3_ENDPOINT_URL"]),
+        k8s.V1EnvVar(name="FLOWI_BUCKET", value="flowi"),
+        k8s.V1EnvVar(name="MONGO_ENDPOINT_URL", value="mongo-service"),
+        k8s.V1EnvVar(name="DASK_SCHEDULER", value="tcp://dask-scheduler:8786"),
+        k8s.V1EnvVar(name="MLFLOW_TRACKING_URI", value="http://mlflow-service"),
+        k8s.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=os.environ["AWS_ACCESS_KEY_ID"]),
+        k8s.V1EnvVar(name="AWS_SECRET_ACCESS_KEY", value=os.environ["AWS_SECRET_ACCESS_KEY"]),
+    ],
+    is_delete_operator_pod=True,
+    in_cluster=True,
+    task_id="flowi-train",
+    get_logs=True,
+)
+
+
+def compare_models_func(ds, **kwargs):
+    ti = kwargs["ti"]
+    run_id = ti.xcom_pull(task_ids="generate_uuid")
+    print("Comparing models. Flow Name {} | RUN ID {} | Version {}".format(flow_name, run_id, version))
+
+    mongo = Mongo()
+    deployed_model = mongo.get_deployed_model(flow_name=flow_name)
+    print(deployed_model)
+
+    if deployed_model is None:
+        print(f"There is no deployed model for {flow_name} yet. Setting to deploy.")
+        return "update_deployed"
+
+    staged_model = mongo.get_staged_model(flow_name=flow_name, run_id=run_id)
+    print(staged_model)
+
+    if deployed_model["metrics"]["accuracy"] < deployed_model["metrics"]["accuracy"]:
+        return "update_deployed"
+
+    return "skip_update"
+
+
+compare_models_task = BranchPythonOperator(
+    task_id="compare_models", provide_context=True, python_callable=compare_models_func, dag=dag
+)
+
+
+def update_deployed(ds, **kwargs):
+    ti = kwargs["ti"]
+    run_id = ti.xcom_pull(task_ids="generate_uuid")
+    print(flow_name)
+    print(run_id)
+
+    mongo = Mongo()
+    deployed_model = mongo.get_deployed_model(flow_name=flow_name)
+    print(deployed_model)
+    if deployed_model is not None:
+        mongo.undeploy_model(mongo_id=deployed_model["_id"])
+
+    staged_model = mongo.get_staged_model(flow_name=flow_name, run_id=run_id)
+    mongo.deploy_model(mongo_id=staged_model["_id"])
+    mongo.unstage_model(mongo_id=staged_model["_id"])
+
+
+update_deployed_task = PythonOperator(
+    task_id="update_deployed", provide_context=True, python_callable=update_deployed, dag=dag
+)
+
+
+skip_update_task = BashOperator(
+    task_id="skip_update", dag=dag, bash_command='echo "Model deployed is better than new model. Skipping update."'
+)
+
+
+validate_chart_task.set_upstream(generate_uuid_task)
+train_task.set_upstream(validate_chart_task)
+compare_models_task.set_upstream(train_task)
+update_deployed_task.set_upstream(compare_models_task)
+skip_update_task.set_upstream(compare_models_task)
+
+
+if deploy_api:
+    trigger_deploy_api_task = TriggerDagRunOperator(
+        dag=dag,
+        task_id="trigger_deploy_api",
+        trigger_dag_id="FlowiDeployAPI",
+        conf={"flow_name": f"{flow_name.lower()}", "run_id": '{{ ti.xcom_pull("generate_uuid") }}'},
+    )
+
+    trigger_deploy_api_task.set_upstream(update_deployed_task)
+
+
+if deploy_batch:
+    trigger_deploy_batch_task = TriggerDagRunOperator(
+        dag=dag,
+        task_id="trigger_deploy_batch",
+        trigger_dag_id="FlowiDeployBatch",
+        conf={
+            "flow_name": f"{flow_name}",
+            "run_id": '{{ ti.xcom_pull("generate_uuid") }}',
+            "schedule_interval": flowi_config["deploy"]["batch"]["schedule_interval"],
+        },
+    )
+
+    trigger_deploy_batch_task.set_upstream(update_deployed_task)
