@@ -66,8 +66,6 @@ class ExperimentTracking(metaclass=Singleton):
         drift_detector_uris = []
         for file in files:
             new_file_path = os.path.join(file_path, file)
-            os.rename(new_file_path, new_file_path.replace(".dill", ".pickle"))
-            new_file_path = new_file_path.replace(".dill", ".pickle")
             uri = self._experiment_tracking.save_drift(experiment_id=self._current_experiment, file_path=new_file_path)
             drift_detector_uris.append(uri)
 

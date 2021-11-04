@@ -41,6 +41,6 @@ class Drift(ComponentBase):
         if isinstance(df, dd.DataFrame):
             df = self._handle_df(df)
 
-        drift_detector = KSDrift(df, p_val=p_val)
+        drift_detector = KSDrift(df, p_val=p_val, data_type="tabular")
 
         return drift_detector

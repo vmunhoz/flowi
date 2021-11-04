@@ -148,7 +148,7 @@ def deploy_drift_detector(ds, **kwargs):
               - name: RCLONE_CONFIG_S3_ENV_AUTH
                 value: "false"
               - name: RCLONE_CONFIG_S3_ENDPOINT
-                value: http://{os.environ["MLFLOW_S3_ENDPOINT_URL"]}
+                value: {os.environ["MLFLOW_S3_ENDPOINT_URL"]}
               - name: RCLONE_CONFIG_S3_ACCESS_KEY_ID
                 value: {os.environ["AWS_ACCESS_KEY_ID"]}
               - name: RCLONE_CONFIG_S3_SECRET_ACCESS_KEY
@@ -160,7 +160,7 @@ def deploy_drift_detector(ds, **kwargs):
             - --http_port
             - '8080'
             - --protocol
-            - tensorflow.http
+            - seldon.http
             - --storage_uri
             - s3://models/staging/{run_id}
             - --reply_url
