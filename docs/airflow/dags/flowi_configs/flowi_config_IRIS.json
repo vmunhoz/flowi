@@ -4,7 +4,7 @@
     "properties": {
         "name": "LoadFile",
         "class": "LoadS3",
-        "attributes": {"train_path": "tests/iris_pred.csv", "test_path": "", "test_split": 1.0, "file_type": "csv"}
+        "attributes": {"train_path": "tests/iris.csv", "test_path": "", "test_split": 1.0, "file_type": "csv"}
     }
 },
 "destiny": {

@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: flowi-ui
-        image: localhost:32000/flowi-ui
+        image: psilvaleo/flowi-ui
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:

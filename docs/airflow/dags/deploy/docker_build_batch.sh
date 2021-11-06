@@ -9,16 +9,20 @@ echo 'flowi' > requirements.txt
 
 ## Dockerfile
 
-echo 'FROM python:3.8-slim
-WORKDIR /app
-COPY requirements.txt /app
-RUN pip install -r requirements.txt
-COPY . /app
+echo 'FROM psilvaleo/flowi
+
+#WORKDIR /app
+#COPY requirements.txt /app
+#RUN pip install -r requirements.txt
+COPY . .
 ' > Dockerfile
 
+mkdir drift_detector
 
 aws s3 cp "s3://models/staging/${RUN_ID}/model.pkl" "model.pkl" --endpoint-url http://minio-service
-aws s3 cp "s3://models/staging/${RUN_ID}/drift_detector.pkl" "drift_detector.pkl" --endpoint-url http://minio-service
+aws s3 cp "s3://models/staging/${RUN_ID}/columns.pkl" "columns.pkl" --endpoint-url http://minio-service
+aws s3 cp "s3://models/staging/${RUN_ID}/KSDrift.pickle" "drift_detector/KSDrift.pickle" --endpoint-url http://minio-service
+aws s3 cp "s3://models/staging/${RUN_ID}/meta.pickle" "drift_detector/meta.pickle" --endpoint-url http://minio-service
 aws s3 cp "s3://models/staging/${RUN_ID}/input_transformer.pkl" "input_transformer.pkl"  --endpoint-url http://minio-service
 aws s3 cp "s3://models/staging/${RUN_ID}/output_transformer.pkl" "output_transformer.pkl"  --endpoint-url http://minio-service
 

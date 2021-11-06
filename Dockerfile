@@ -5,6 +5,7 @@ ENV POETRY_VERSION=1.1.6
 
 RUN apt update && \
     apt install --no-install-recommends -y build-essential software-properties-common && \
+    apt install libgl1 ffmpeg libsm6 libxext6 -y && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt install --no-install-recommends -y python${PYTHON_VERSION} python3-pip python3-setuptools python3-distutils && \
     cd /usr/bin && \
@@ -31,6 +32,3 @@ RUN poetry config virtualenvs.create false && \
 COPY flowi/ ./flowi/
 
 RUN mkdir -p /airflow/xcom/
-
-RUN apt-get update && apt-get install libgl1 -y
-RUN apt-get install ffmpeg libsm6 libxext6 -y

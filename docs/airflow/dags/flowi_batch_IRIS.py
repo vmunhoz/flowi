@@ -60,9 +60,11 @@ batch_task = kubernetes_pod.KubernetesPodOperator(
 
 
 def get_branch_follow(**kwargs):
-    x = kwargs["ti"].xcom_pull(task_ids="flowi-batch", key="drift")
+    x = kwargs["ti"].xcom_pull(task_ids="flowi-batch", key="return_value")
     print("From Kwargs: ", x)
-    if x == "1":
+    drift = x["drift"]
+
+    if drift == "1":
         return "task_drifted"
     else:
         return "task_not_drifted"

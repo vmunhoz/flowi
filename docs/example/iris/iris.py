@@ -23,7 +23,7 @@ def predict(X):
     #    }
     headers = {}
     res = requests.post(
-        "http://" + CLUSTER_IP + "/seldon/seldon/mnist/api/v1.0/predictions", json=formData, headers=headers
+        "http://" + CLUSTER_IP + "/seldon/seldon/iris/api/v1.0/predictions", json=formData, headers=headers
     )
     if res.status_code == 200:
         # j = res.json()

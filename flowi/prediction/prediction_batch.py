@@ -5,6 +5,8 @@ import dask.dataframe as dd
 
 from flowi.utilities.logger import Logger
 from flowi.utilities.airflow_xcom import write_xcom
+from alibi_detect.utils.saving import load_detector
+
 
 _logger = Logger(logger_name=__name__)
 
@@ -23,6 +25,10 @@ def predict(source: dict, destiny: dict, result_only: bool = True):
     source_result = source_node.run(global_variables={})
     X = source_result["test_df"]
 
+    # Filtering columns
+    columns = _load("columns.pkl")
+    X = X[columns]
+
     # transform
     input_transformer = _load("input_transformer.pkl")
     if input_transformer:
@@ -30,7 +36,7 @@ def predict(source: dict, destiny: dict, result_only: bool = True):
         X = input_transformer.transform(X)
 
     # drift detection
-    drift_detector = _load("drift_detector.pkl")
+    drift_detector = load_detector("drift_detector")
 
     n_samples = 400
     length = len(X)
@@ -63,3 +69,5 @@ def predict(source: dict, destiny: dict, result_only: bool = True):
     destiny_node.run(global_variables={})
 
     _logger.info("Finished Batch predict")
+
+    write_xcom(key="drift", value="0")
