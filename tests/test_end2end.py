@@ -28,15 +28,15 @@ FLOW_CHART = {
                 "attributes": {"train_path": "tests/iris.csv", "test_path": "", "test_split": 0.2, "file_type": "csv"},
             },
         },
-        "node-label-enc": {
-            "id": "node-label-enc",
-            "type": "Label",
-            "properties": {
-                "name": "LabelEncoder",
-                "class": "Label",
-                "attributes": {"target_column": "class", "is_label": True},
-            },
-        },
+        # "node-label-enc": {
+        #     "id": "node-label-enc",
+        #     "type": "Label",
+        #     "properties": {
+        #         "name": "LabelEncoder",
+        #         "class": "Label",
+        #         "attributes": {"target_column": "class", "is_label": True},
+        #     },
+        # },
         "node-fillna": {
             "id": "node-fillna",
             "type": "Preprocessing",
@@ -63,23 +63,33 @@ FLOW_CHART = {
                 },
             },
         },
-        "node-model-svc": {
-            "id": "node-model-svc",
+        # "node-model-svc": {
+        #     "id": "node-model-svc",
+        #     "type": "Models",
+        #     "properties": {"name": "svc", "class": "Classification", "attributes": {"target_column": "class"}},
+        # },
+        # "node-model-svc2": {
+        #     "id": "node-model-svc2",
+        #     "type": "Models",
+        #     "properties": {"name": "svc", "class": "Classification", "attributes": {"target_column": "class"}},
+        # },
+        "node-model-tfcnn": {
+            "id": "node-model-tfcnn",
             "type": "Models",
-            "properties": {"name": "svc", "class": "Classification", "attributes": {"target_column": "class"}},
+            "properties": {"name": "tfcnn", "class": "Classification", "attributes": {"target_column": "class"}},
         },
-        "node-model-svc2": {
-            "id": "node-model-svc2",
-            "type": "Models",
-            "properties": {"name": "svc", "class": "Classification", "attributes": {"target_column": "class"}},
-        },
-        "node-metric-accuracy": {
-            "id": "node-metric-accuracy",
-            "type": "Metrics",
-            "properties": {"name": "accuracy", "class": "Classification", "attributes": {"target_column": "class"}},
-        },
-        "node-metric-accuracy2": {
-            "id": "node-metric-accuracy2",
+        # "node-metric-accuracy": {
+        #     "id": "node-metric-accuracy",
+        #     "type": "Metrics",
+        #     "properties": {"name": "accuracy", "class": "Classification", "attributes": {"target_column": "class"}},
+        # },
+        # "node-metric-accuracy2": {
+        #     "id": "node-metric-accuracy2",
+        #     "type": "Metrics",
+        #     "properties": {"name": "accuracy", "class": "Classification", "attributes": {"target_column": "class"}},
+        # },
+        "node-metric-accuracy3": {
+            "id": "node-metric-accuracy3",
             "type": "Metrics",
             "properties": {"name": "accuracy", "class": "Classification", "attributes": {"target_column": "class"}},
         },
@@ -94,19 +104,25 @@ FLOW_CHART = {
         },
     },
     "links": {
-        "link-load-fillna-1": {"from": {"nodeId": "node-load-1"}, "to": {"nodeId": "node-label-enc"}},
-        "link-load-fillna-2": {"from": {"nodeId": "node-load-2"}, "to": {"nodeId": "node-label-enc"}},
-        "link-label-enc-fillna": {"from": {"nodeId": "node-label-enc"}, "to": {"nodeId": "node-fillna"}},
+        "link-load-fillna-1": {"from": {"nodeId": "node-load-1"}, "to": {"nodeId": "node-fillna"}},
+        "link-load-fillna-2": {"from": {"nodeId": "node-load-2"}, "to": {"nodeId": "node-fillna"}},
+        # "link-label-enc-fillna": {"from": {"nodeId": "node-label-enc"}, "to": {"nodeId": "node-fillna"}},
         "link-label-fillna-standard-scaler": {
             "from": {"nodeId": "node-fillna"},
             "to": {"nodeId": "node-standard-scaler"},
         },
-        "link-standard-scaler-svc": {"from": {"nodeId": "node-standard-scaler"}, "to": {"nodeId": "node-model-svc"}},
-        "link-standard-scaler-svc2": {"from": {"nodeId": "node-standard-scaler"}, "to": {"nodeId": "node-model-svc2"}},
-        "link-svc-accuracy": {"from": {"nodeId": "node-model-svc"}, "to": {"nodeId": "node-metric-accuracy"}},
-        "link-svc-accuracy2": {"from": {"nodeId": "node-model-svc2"}, "to": {"nodeId": "node-metric-accuracy2"}},
-        "link-accuracy-save": {"from": {"nodeId": "node-metric-accuracy"}, "to": {"nodeId": "node-save"}},
-        "link-accuracy2-save": {"from": {"nodeId": "node-metric-accuracy2"}, "to": {"nodeId": "node-save"}},
+        # "link-standard-scaler-svc": {"from": {"nodeId": "node-standard-scaler"}, "to": {"nodeId": "node-model-svc"}},
+        # "link-standard-scaler-svc2": {"from": {"nodeId": "node-standard-scaler"}, "to": {"nodeId": "node-model-svc2"}},
+        "link-standard-scaler-tfcnn": {
+            "from": {"nodeId": "node-standard-scaler"},
+            "to": {"nodeId": "node-model-tfcnn"},
+        },
+        # "link-svc-accuracy": {"from": {"nodeId": "node-model-svc"}, "to": {"nodeId": "node-metric-accuracy"}},
+        # "link-svc-accuracy2": {"from": {"nodeId": "node-model-svc2"}, "to": {"nodeId": "node-metric-accuracy2"}},
+        "link-svc-accuracy3": {"from": {"nodeId": "node-model-tfcnn"}, "to": {"nodeId": "node-metric-accuracy3"}},
+        # "link-accuracy-save": {"from": {"nodeId": "node-metric-accuracy"}, "to": {"nodeId": "node-save"}},
+        # "link-accuracy2-save": {"from": {"nodeId": "node-metric-accuracy2"}, "to": {"nodeId": "node-save"}},
+        "link-accuracy3-save": {"from": {"nodeId": "node-metric-accuracy3"}, "to": {"nodeId": "node-save"}},
     },
 }
 

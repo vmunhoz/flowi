@@ -5,8 +5,12 @@ from sklearn import svm
 
 from flowi.components.component_base import ComponentBase
 from flowi.components.model_selection import ModelSelection
+from flowi.components.models._wrappers import OneHotModel
 from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.utilities.logger import Logger
+from tensorflow.keras import layers
+from tensorflow.keras.models import Sequential
+from scikeras.wrappers import KerasClassifier
 
 
 class Classification(ComponentBase):
@@ -94,6 +98,38 @@ class Classification(ComponentBase):
             "random_state": self._to_list(random_state),
         }
         model = svm.SVC(**parameters)
+        model, parameters = self._fit_sklearn(
+            model=model,
+            parameters=parameters,
+            df=df,
+            target_column=target_column,
+            verbose=verbose,
+            has_model_selection_in_flow=has_model_selection_in_next_step,
+        )
+
+        return model, parameters
+
+    def tfcnn(
+        self, df: dd.DataFrame, target_column: str, verbose: int = 0, has_model_selection_in_next_step: bool = False
+    ):
+        def build_model(lr=0.01, momentum=0.9):
+            model = Sequential()
+            model.add(layers.Dense(512, activation="relu", input_shape=(4,)))
+            model.add(layers.Dense(3, activation="softmax"))
+
+            model.compile(optimizer="rmsprop", loss="categorical_crossentropy", metrics=["accuracy"])
+
+            return model
+
+        niceties = dict(verbose=True, epochs=150)
+
+        model = KerasClassifier(build_fn=build_model, lr=None, momentum=None, **niceties)
+        model = OneHotModel(model=model)
+
+        from scipy.stats import loguniform, uniform
+
+        parameters = {"lr": loguniform(1e-3, 1e-1), "momentum": uniform(0, 1)}
+
         model, parameters = self._fit_sklearn(
             model=model,
             parameters=parameters,

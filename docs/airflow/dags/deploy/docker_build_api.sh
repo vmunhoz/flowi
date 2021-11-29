@@ -11,6 +11,7 @@ import numpy as np
 from typing import Union, List
 import logging
 import pandas as pd
+import tensorflow as tf
 
 
 class DummyTransformer(object):
@@ -36,11 +37,21 @@ class Model(object):
     def __init__(self):
         self._log = logging.getLogger("model-logger")
         self._log.info("Initializing")
-        self._model = self._load("model.pkl")
+        self._model = None
+        self.loaded = False
+        self.graph = None
         self._input_transformer = self._load("input_transformer.pkl")
         self._output_transformer = self._load("output_transformer.pkl")
         self._columns = self._load("columns.pkl")
         self._log.info(self._columns)
+
+    def load(self):
+        self._log.info(f"Loading model for pid {os.getpid()}")
+        self.graph = tf.compat.v1.get_default_graph()
+        with self.graph.as_default():
+            self._model = self._load("model.pkl")
+        self.loaded = True
+        self._log.info("Loaded model")
 
     def health_status(self):
         return {"status": "ok"}
@@ -55,20 +66,28 @@ class Model(object):
             return DummyTransformer()
 
     def transform_input(self, X: np.ndarray) -> Union[np.ndarray, List, str, bytes]:
+        self._log.debug("Transforming Input")
         return self._input_transformer.transform(X)
 
     def predict(self, X, features_names):
-        self._log.info("Predicting")
+        if not self.loaded:
+            self._log.debug("Not loaded")
+            self.load()
+
         if isinstance(X, np.ndarray):
             X = pd.DataFrame(X, columns=self._columns)
 
         X = self.transform_input(X)
 
-        y = self._model.predict(X)
+        self._log.info("Predicting")
+        with self.graph.as_default():
+            y = self._model.predict(X)
+
         y = self.transform_output(y)
         return y
 
     def transform_output(self, X: np.ndarray) -> Union[np.ndarray, List, str, bytes]:
+        self._log.debug("Transforming Output")
         return self._output_transformer.inverse_transform(X)
 
 ' > Model.py

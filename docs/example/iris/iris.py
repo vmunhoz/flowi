@@ -2,6 +2,7 @@ import numpy as np
 import requests
 import json
 import pandas as pd
+import time
 
 
 CLUSTER_IP = "10.152.183.184"
@@ -35,8 +36,11 @@ def predict(X):
         return []
 
 
-for i in range(500):
-    predict(df)
+for i in range(5):
+    print(i)
+    for j in range(500):
+        predict(df)
+    time.sleep(2)
 
 
 print("--- predicting drift")
@@ -49,5 +53,8 @@ df = df.drop("class", 1)
 df = df.fillna(value=0)
 # print(df.values)
 
-for i in range(500):
-    predict(df)
+for i in range(5):
+    print(i)
+    for j in range(500):
+        predict(df)
+    time.sleep(2)

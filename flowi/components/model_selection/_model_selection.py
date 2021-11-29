@@ -2,9 +2,11 @@ from typing import Any
 
 import dask.dataframe as dd
 from dask_ml.model_selection import RandomizedSearchCV
+from scikeras.wrappers import KerasClassifier
 
 from flowi.components.component_base import ComponentBase
 from flowi.components.data_preparation import DataPreparationSKLearn
+from flowi.components.models._wrappers import OneHotModel
 from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.utilities.logger import Logger
 
@@ -39,8 +41,16 @@ class ModelSelection(ComponentBase):
         cv: int = 5,
         verbose: int = 0,
     ):
-        sklean_data_prep = DataPreparationSKLearn()
-        X, y = sklean_data_prep.prepare_train(df=df, target_column=target_column)
+        if isinstance(model, OneHotModel):
+            flowi_model = model
+            model = flowi_model.model
+
+            sklean_data_prep = DataPreparationSKLearn()
+            X, y = sklean_data_prep.prepare_train(df=df, target_column=target_column)
+            y = flowi_model.encode(y)
+        else:
+            sklean_data_prep = DataPreparationSKLearn()
+            X, y = sklean_data_prep.prepare_train(df=df, target_column=target_column)
         tune_search = RandomizedSearchCV(
             estimator=model, param_distributions=parameters, n_jobs=-1, error_score=0, cv=cv
         )
@@ -48,4 +58,9 @@ class ModelSelection(ComponentBase):
         self._logger.debug(f"Model: {model.__class__.__name__}")
         self._logger.debug(f"Best Parameters: {tune_search.best_params_}")
 
-        return tune_search.best_estimator_, tune_search.best_params_
+        model = tune_search.best_estimator_
+        if isinstance(model, KerasClassifier):
+            flowi_model.model = model
+            model = flowi_model
+
+        return model, tune_search.best_params_

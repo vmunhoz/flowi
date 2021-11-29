@@ -1366,6 +1366,18 @@ six = "*"
 tqdm = "*"
 
 [[package]]
+name = "scikeras"
+version = "0.4.1"
+description = "Scikit-Learn API wrapper for Keras."
+category = "main"
+optional = false
+python-versions = ">=3.6.1,<4.0"
+
+[package.dependencies]
+packaging = ">=0.21,<22.0"
+scikit-learn = ">=0.22.0"
+
+[[package]]
 name = "scikit-image"
 version = "0.18.3"
 description = "Image processing in Python"
@@ -1847,7 +1859,7 @@ heapdict = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "cfbc32ae288f20fa7dd7086ca277516d8c75b4b8103960b35131f5ecb14722de"
+content-hash = "14ff361e002bcdc16bd18377d7c0ecc4c4b09be40cf0af3af830e68c7d014178"
 
 [metadata.files]
 absl-py = [
@@ -3032,6 +3044,10 @@ s3transfer = [
 sacremoses = [
     {file = "sacremoses-0.0.45-py3-none-any.whl", hash = "sha256:fa93db44bc04542553ba6090818b892f603d02aa0d681e6c5c3023baf17e8564"},
     {file = "sacremoses-0.0.45.tar.gz", hash = "sha256:58176cc28391830789b763641d0f458819bebe88681dac72b41a19c0aedc07e9"},
+]
+scikeras = [
+    {file = "scikeras-0.4.1-py3-none-any.whl", hash = "sha256:e61755f29df5b23aa30b3e6ddc8889607a6dcd936cb441de6207d185b0429ab4"},
+    {file = "scikeras-0.4.1.tar.gz", hash = "sha256:851f00d2477ea166eebe5ef093c82cd29ef67b7efd90fa12a2889adcfafccaf5"},
 ]
 scikit-image = [
     {file = "scikit-image-0.18.3.tar.gz", hash = "sha256:ecae99f93f4c5e9b1bf34959f4dc596c41f2f6b2fc407d9d9ddf85aebd3137ca"},
