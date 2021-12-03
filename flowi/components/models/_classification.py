@@ -5,7 +5,7 @@ from sklearn import svm
 
 from flowi.components.component_base import ComponentBase
 from flowi.components.model_selection import ModelSelection
-from flowi.components.models._wrappers import OneHotModel
+from flowi.components.models._wrappers import OneHotModel, CategoryModel
 from flowi.experiment_tracking.experiment_tracking import ExperimentTracking
 from flowi.utilities.logger import Logger
 from tensorflow.keras import layers
@@ -98,6 +98,7 @@ class Classification(ComponentBase):
             "random_state": self._to_list(random_state),
         }
         model = svm.SVC(**parameters)
+        model = CategoryModel(model=model)
         model, parameters = self._fit_sklearn(
             model=model,
             parameters=parameters,
@@ -121,9 +122,9 @@ class Classification(ComponentBase):
 
             return model
 
-        niceties = dict(verbose=True, epochs=150)
+        niceties = dict(verbose=True, epochs=2)
 
-        model = KerasClassifier(build_fn=build_model, lr=None, momentum=None, **niceties)
+        model = KerasClassifier(model=build_model, lr=None, momentum=None, **niceties)
         model = OneHotModel(model=model)
 
         from scipy.stats import loguniform, uniform

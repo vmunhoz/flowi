@@ -14,10 +14,15 @@ class LoadS3(ComponentBase):
         self._logger = Logger(logger_name=__name__)
 
     def _set_output(self, method_name: str, result: Any, methods_kwargs: dict) -> dict:
-        return {"df": result[0], "test_df": result[1]}
+        return {"df": result[0], "test_df": result[1], "target_column": methods_kwargs["target_column"]}
 
     def load_file(
-        self, train_path: str, file_type: str = "csv", test_path: str = "", test_split: float = 0.2
+        self,
+        train_path: str,
+        file_type: str = "csv",
+        test_path: str = "",
+        test_split: float = 0.2,
+        target_column: str = "class",
     ) -> (dd.DataFrame, dd.DataFrame):
         self._logger.debug("Loading train file: {}".format(train_path))
         train_df = self.load(file_type=file_type)(train_path)

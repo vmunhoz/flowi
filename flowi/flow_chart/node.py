@@ -52,14 +52,15 @@ class Node(object):
         state = {
             "df": self._append_incoming_df(attribute_type="df"),
             "test_df": self._append_incoming_df(attribute_type="test_df"),
-            "model": self._get_incoming_attribute("model"),
-            "model_uri": self._get_incoming_attribute("model_uri"),
-            "parameters": self._get_incoming_attribute("parameters"),
-            "y_pred": self._get_incoming_attribute("y_pred"),
-            "y_true": self._get_incoming_attribute("y_true"),
+            "target_column": self._get_incoming_attribute(attribute_name="target_column"),
+            "model": self._get_incoming_attribute(attribute_name="model"),
+            "model_uri": self._get_incoming_attribute(attribute_name="model_uri"),
+            "parameters": self._get_incoming_attribute(attribute_name="parameters"),
+            "y_pred": self._get_incoming_attribute(attribute_name="y_pred"),
+            "y_true": self._get_incoming_attribute(attribute_name="y_true"),
             "has_model_selection_in_next_step": self._model_selection_in_next(),
-            "experiment_id": self._get_incoming_attribute("experiment_id"),
-            "mongo_id": self._get_incoming_attribute("mongo_id"),
+            "experiment_id": self._get_incoming_attribute(attribute_name="experiment_id"),
+            "mongo_id": self._get_incoming_attribute(attribute_name="mongo_id"),
         }
 
         return state

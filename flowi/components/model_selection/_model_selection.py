@@ -49,8 +49,12 @@ class ModelSelection(ComponentBase):
             X, y = sklean_data_prep.prepare_train(df=df, target_column=target_column)
             y = flowi_model.encode(y)
         else:
+            flowi_model = model
+            model = flowi_model.model
+
             sklean_data_prep = DataPreparationSKLearn()
             X, y = sklean_data_prep.prepare_train(df=df, target_column=target_column)
+            y = flowi_model.encode(y)
         tune_search = RandomizedSearchCV(
             estimator=model, param_distributions=parameters, n_jobs=-1, error_score=0, cv=cv
         )
@@ -60,6 +64,9 @@ class ModelSelection(ComponentBase):
 
         model = tune_search.best_estimator_
         if isinstance(model, KerasClassifier):
+            flowi_model.model = model
+            model = flowi_model
+        else:
             flowi_model.model = model
             model = flowi_model
 

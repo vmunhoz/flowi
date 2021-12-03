@@ -105,15 +105,21 @@ class FlowChart(object):
             drift_detector_path = self._experiment_tracking.download_artifact(artifact_uri=drift_detector_uri)
             s3.upload_artifact(local_path=drift_detector_path, run_id=run_id)
 
-        input_transformer_path = self._experiment_tracking.download_artifact(
-            artifact_uri=model["input_transformer_uri"]
-        )
-        s3.upload_artifact(local_path=input_transformer_path, run_id=run_id)
+        if model["input_transformer_uri"] != "":
+            input_transformer_path = self._experiment_tracking.download_artifact(
+                artifact_uri=model["input_transformer_uri"]
+            )
+            s3.upload_artifact(local_path=input_transformer_path, run_id=run_id)
+        else:
+            self._logger.warning("No input transformer created for model")
 
-        output_transformer_path = self._experiment_tracking.download_artifact(
-            artifact_uri=model["output_transformer_uri"]
-        )
-        s3.upload_artifact(local_path=output_transformer_path, run_id=run_id)
+        if model["output_transformer_uri"] != "":
+            output_transformer_path = self._experiment_tracking.download_artifact(
+                artifact_uri=model["output_transformer_uri"]
+            )
+            s3.upload_artifact(local_path=output_transformer_path, run_id=run_id)
+        else:
+            self._logger.warning("No out transformer created for model")
 
         self._mongo.stage_model(model["_id"])
 
