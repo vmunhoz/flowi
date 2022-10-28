@@ -3,6 +3,7 @@ sudo usermod -a -G microk8s $USER
 sudo chown -f -R $USER ~/.kube
 #su - $USER
 sudo microk8s status --wait-ready
+newgrp microk8s
 
 # Setup microk8s
 microk8s enable istio helm3 registry

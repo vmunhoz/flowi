@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: minio-service
+  name: minio
   namespace: flowi
 spec:
   selector:
@@ -11,7 +11,17 @@ spec:
       name: api
       port: 80
       targetPort: 9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-console
+  namespace: flowi
+spec:
+  selector:
+    app: minio
+  ports:
     - protocol: TCP
       name: console
-      port: 9001
+      port: 80
       targetPort: 9001

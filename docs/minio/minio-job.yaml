@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-create-bucket
+  namespace: flowi
+spec:
+  activeDeadlineSeconds: 30
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      name: minio-create-bucket
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: minio-create-bucket
+        image: minio/mc
+        command:
+          - /bin/sh
+          - -c
+          - |
+            until curl -fsI http://127.0.0.1:15020/healthz/ready; do echo \"Waiting for Sidecar...\"; sleep 3; done;
+            echo \"Sidecar available. Running the command...\";
+            mc alias set minio http://minio ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY};
+            mc mb minio/mlflow;
+            mc mb minio/models;
+            x=$(echo $?); curl -fsI -X POST http://127.0.0.1:15020/quitquitquit && exit $x
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: flowi-secrets
+              key: minio-admin-access-key
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flowi-secrets
+              key: minio-admin-secret-key

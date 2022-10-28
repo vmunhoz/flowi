@@ -84,7 +84,7 @@ worker:
   - name: TESTE
     value: "1"
   - name: MLFLOW_S3_ENDPOINT_URL
-    value: http://minio-service
+    value: http://minio
   - name: BUCKET
     value: mlflow
   - name: AWS_ACCESS_KEY_ID

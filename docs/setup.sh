@@ -12,6 +12,9 @@ kubectl config set-context --current --namespace=$FLOWI_NAMESPACE
 ## Setup secrets ##
 source setup_secrets.sh
 
+cd istio || (echo "directory istio does not exist"; exit)
+kubectl apply -f gateway.yaml
+
 
 ## Installing Seldon ##
 cd seldon || (echo "directory seldon does not exist"; exit)
@@ -30,9 +33,9 @@ source install_dask.sh
 
 ## Minio ##
 cd ../minio
-#kubectl apply -f minio/minio-pv.yml
-#kubectl apply -f minio/minio-service.yml
-#kubectl apply -f minio/minio-deployment.yml
+#kubectl apply -f minio/minio-pv.yaml
+#kubectl apply -f minio/minio-service.yaml
+#kubectl apply -f minio/minio-deployment.yaml
 source setup_minio.sh
 
 ## Mongo ##
@@ -59,8 +62,8 @@ source setup_mlflow.sh
 
 ## Flowi UI ##
 cd ../flowi-ui
-#kubectl apply -f ./flowi-ui/flowi-ui-deployment.yml
-#kubectl apply -f ./flowi-ui/flowi-ui-service.yml
+#kubectl apply -f ./flowi-ui/flowi-ui-deployment.yaml
+#kubectl apply -f ./flowi-ui/flowi-ui-service.yaml
 source setup_flowi-ui.sh
 
 ## Airflow ##

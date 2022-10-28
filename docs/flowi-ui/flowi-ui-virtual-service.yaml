@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: flowi-ui
+  namespace: flowi
+spec:
+  hosts:
+  - "console.flowi.cloud"
+  gateways:
+  - flowi-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+#    rewrite:
+#      uri: "/"
+    route:
+    - destination:
+        port:
+          number: 80
+        host: flowi-ui

@@ -18,7 +18,7 @@ spec:
       - image: minio/minio
         name: minio
         command: [ "minio", "server" ]
-        args: [ "/data" , "--console-address", ":9001" ]
+        args: [ "/data" , "--console-address", ":9001", "--address", ":9000" ]
         env:
         - name: MINIO_ROOT_USER
           valueFrom:
@@ -31,6 +31,8 @@ spec:
               name: flowi-secrets
               key: minio-admin-secret-key
         ports:
+        - containerPort: 9000
+          name: api
         - containerPort: 9000
           name: minio
         volumeMounts:
