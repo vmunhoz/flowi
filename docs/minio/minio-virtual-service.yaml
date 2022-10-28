@@ -5,7 +5,7 @@ metadata:
   namespace: flowi
 spec:
   hosts:
-  - "*"
+  - "minio.flowi.cloud"
   gateways:
   - flowi-gateway
   http:
