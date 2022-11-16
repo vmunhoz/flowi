@@ -1,12 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: airflow-deployment
+  name: airflow
   namespace: flowi
   labels:
     app: airflow
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: airflow
@@ -19,7 +18,7 @@ spec:
       containers:
       - name: airflow
         imagePullPolicy: Always
-        image: localhost:32000/airflow
+        image: psilvaleo/flowi-airflow
         ports:
         - containerPort: 8080
         volumeMounts:

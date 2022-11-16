@@ -6,7 +6,7 @@ from bson.objectid import ObjectId
 
 class Mongo(object):
     def __init__(self):
-        self._client = MongoClient("mongodb://mongo-service", 27017)
+        self._client = MongoClient("mongodb://mongo", 27017)
         _db = self._client["flowi"]
         self._collection = _db.flowi_training
 

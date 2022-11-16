@@ -53,7 +53,7 @@ class Classification(ComponentBase):
     def _to_list(x: Any):
         return x if isinstance(x, list) else [x]
 
-    def svc(
+    def s_v_c(
         self,
         df: dd.DataFrame,
         target_column: str,
@@ -80,6 +80,11 @@ class Classification(ComponentBase):
         # if 'precomputed' in kernels and X_train.shape[0] != X_train.shape[1]:
         if "precomputed" in kernels:
             kernels.remove("precomputed")
+
+        if isinstance(class_weight, str) and class_weight.lower() == "none":
+            class_weight = None
+        if isinstance(random_state, str) and random_state.lower() == "none":
+            random_state = None
 
         parameters = {
             "C": self._to_list(C),

@@ -1,0 +1,29 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: airflow
+  namespace: flowi
+spec:
+  hosts:
+  - "orchestration.flowi.cloud"
+  gateways:
+  - flowi-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        port:
+          number: 80
+        host: airflow
+    corsPolicy:
+      allowOrigins:
+      - exact: https://console.flowi.cloud
+      allowMethods:
+        - POST
+        - GET
+      allowCredentials: true
+      allowHeaders:
+      - Authorization
+      - Content-Type

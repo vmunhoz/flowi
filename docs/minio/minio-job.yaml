@@ -4,6 +4,7 @@ metadata:
   name: minio-create-bucket
   namespace: flowi
 spec:
+  ttlSecondsAfterFinished: 100
   activeDeadlineSeconds: 30
   completions: 1
   parallelism: 1
@@ -22,6 +23,7 @@ spec:
             until curl -fsI http://127.0.0.1:15020/healthz/ready; do echo \"Waiting for Sidecar...\"; sleep 3; done;
             echo \"Sidecar available. Running the command...\";
             mc alias set minio http://minio ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY};
+            mc mb minio/flowi;
             mc mb minio/mlflow;
             mc mb minio/models;
             x=$(echo $?); curl -fsI -X POST http://127.0.0.1:15020/quitquitquit && exit $x

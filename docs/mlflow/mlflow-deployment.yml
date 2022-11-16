@@ -1,12 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mlflow-deployment
+  name: mlflow
   namespace: flowi
   labels:
     app: mlflow
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: mlflow
@@ -17,7 +16,8 @@ spec:
     spec:
       containers:
       - name: mlflow
-        image: localhost:32000/mlflow
+        image: psilvaleo/mlflow
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
         env:
@@ -36,7 +36,7 @@ spec:
               name: flowi-secrets
               key: minio-secret-key
         - name: MYSQL_HOST
-          value: mysql-service
+          value: mysql
         - name: MYSQL_DATABASE
           value: mlflow
         - name: MYSQL_USER

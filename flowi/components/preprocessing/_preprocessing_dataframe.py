@@ -14,29 +14,32 @@ import numpy as np
 
 class ColumnFilter(BaseEstimator, TransformerMixin):
     def __init__(self, columns: List[str], exclude_columns: List[str], transformer):
-        self._columns = columns
-        self._exclude_columns = exclude_columns
-        self._transformer = transformer
+        self.columns = columns
+        self.exclude_columns = exclude_columns
+        self.transformer = transformer
+        self._logger = Logger(__name__)
 
-        if self._columns and self._exclude_columns:
+        if self.columns and self.exclude_columns:
             raise ValueError("Columns and exclude_columns cannot be set together")
 
     def _filter_columns(self, X) -> List[str]:
-        if self._columns:
-            return self._columns
-        elif self._exclude_columns:
-            return X.columns.difference(self._exclude_columns).tolist()
+        if self.columns:
+            columns = self.columns if isinstance(self.columns, list) else [self.columns]
+            return columns
+        elif self.exclude_columns:
+            exclude_columns = self.exclude_columns if isinstance(self.exclude_columns, list) else [self.exclude_columns]
+            return X.columns.difference(exclude_columns).to_list()
         return X.columns.tolist()
 
     def fit(self, X):
-        self._transformer.fit(X[self._filter_columns(X)])
+        self.transformer.fit(X[self._filter_columns(X)])
 
     def transform(self, X):
-        X[self._filter_columns(X)] = self._transformer.transform(X[self._filter_columns(X)])
+        X[self._filter_columns(X)] = self.transformer.transform(X[self._filter_columns(X)])
         return X
 
     def inverse_transform(self, X):
-        X[self._filter_columns(X)] = self._transformer.inverse_transform(X[self._filter_columns(X)])
+        X[self._filter_columns(X)] = self.transformer.inverse_transform(X[self._filter_columns(X)])
         return X
 
 
@@ -76,6 +79,9 @@ class PreprocessingDataframe(ComponentBase):
         """
         self._logger.debug(f"missing_values: {missing_values}")
         self._logger.debug(f"strategy: {strategy}")
+
+        if isinstance(missing_values, str) and missing_values.lower() == "nan":
+            missing_values = np.nan
 
         base_transformer = SimpleImputer(missing_values=missing_values, strategy=strategy, fill_value=fill_value)
         transformer = ColumnFilter(columns=columns, exclude_columns=exclude_columns, transformer=base_transformer)

@@ -6,10 +6,10 @@ set timeout -1
 #spawn ./create_user.sh
 spawn airflow users create \
     --username admin \
-    --firstname Peter \
-    --lastname Parker \
+    --firstname John \
+    --lastname Doe \
     --role Admin \
-    --email spiderman@superhero.org
+    --email john@doe.org
 
 expect "Password:"
 send -- "admin\n"

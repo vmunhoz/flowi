@@ -89,7 +89,7 @@ train_task = kubernetes_pod.KubernetesPodOperator(
         k8s.V1EnvVar(name="EXPERIMENT_TRACKING", value=experiment_tracking),
         k8s.V1EnvVar(name="MLFLOW_S3_ENDPOINT_URL", value=os.environ["MLFLOW_S3_ENDPOINT_URL"]),
         k8s.V1EnvVar(name="FLOWI_BUCKET", value="flowi"),
-        k8s.V1EnvVar(name="MONGO_ENDPOINT_URL", value="mongo-service"),
+        k8s.V1EnvVar(name="MONGO_ENDPOINT_URL", value="mongo"),
         k8s.V1EnvVar(name="DASK_SCHEDULER", value="tcp://dask-scheduler:8786"),
         k8s.V1EnvVar(name="MLFLOW_TRACKING_URI", value="http://mlflow-service"),
         k8s.V1EnvVar(name="AWS_ACCESS_KEY_ID", value=os.environ["AWS_ACCESS_KEY_ID"]),

@@ -80,6 +80,9 @@ class FlowChart(object):
         best_model = None
         best_performance = 0.0
         for model in models:
+            if "accuracy" not in model["metrics"]:
+                continue
+
             model_performance = model["metrics"]["accuracy"]
             if model_performance > best_performance:
                 best_performance = model_performance
@@ -124,7 +127,11 @@ class FlowChart(object):
         self._mongo.stage_model(model["_id"])
 
     def run(self):
+        self._logger.info(f"NUMBER OF COMBINATIONS: {len(self._runs_params)}")
+        self._logger.debug(str(self._runs_params))
         for run_params in self._runs_params:
+            self._logger.debug("PARAMS")
+            self._logger.debug(str(run_params))
             global_variables = {}
             self._experiment_tracking.reset_experiments(num_experiments=self._num_experiments)
 
